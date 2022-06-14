@@ -1,0 +1,4 @@
+This app is designed to run in a hosted environment with no computational backend.
+Consequently, you will need to do a small amount of preparation in order to have the correct input files.
+This means running a handful of quick Rosetta protocols. Instructions are provided
+on the "file upload" page.

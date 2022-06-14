@@ -1,0 +1,4 @@
+This app contains a set of interactive tools to help determine key interactions within a
+protein structure that affect its stability and/or activity. The primary intent is to compare
+a designed structure against the wild-type that it was mutated from. However, many tools do not require
+comparison against a reference structure, so they can be used to evaluate wild-type structures.
