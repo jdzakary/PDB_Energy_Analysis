@@ -1,5 +1,6 @@
 import streamlit as st
 from utility import load_text
+import sys
 
 files = {
     'pdb_wild': {
@@ -15,7 +16,11 @@ files = {
         'type': ['csv']
     },
     'energy_variant': {
-        'label': 'Energy Breakdown Variant',
+        'label': 'Energy Breakdown: Variant',
+        'type': ['csv']
+    },
+    'mutations': {
+        'label': 'Mutations Files',
         'type': ['csv']
     }
 }
@@ -35,7 +40,8 @@ def main():
         if key not in st.session_state.keys() or st.session_state[key] is None:
             file_uploader(key, value)
         else:
-            st.success(f'{value["label"]} --- is already uploaded')
+            st.success(f'{value["label"]} is already uploaded --- '
+                       f'{st.session_state[key].name}')
 
     with st.expander('PDB Files'):
         st.write(load_text('file_upload', 'pdb_files'))
@@ -57,8 +63,19 @@ def main():
             file_name='energy_breakdown.py',
         )
 
+    with st.expander('Mutations CSV'):
+        st.write(load_text('file_upload', 'mutations'))
+        with open('scripts/example_mutations.csv', 'rb') as file:
+            example = file.read()
+        st.download_button(
+            label='Example Mutations Files',
+            data=example,
+            file_name='example_mutations.csv',
+        )
+
     with st.expander('Residue Depth'):
         st.write(load_text('file_upload', 'residue_depth'))
+        st.write(sys.platform)
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@ import json
 import pandas as pd
 from typing import List, Dict, Tuple, Hashable
 from streamlit.uploaded_file_manager import UploadedFile
+from streamlit.elements.progress import ProgressMixin
 
 
 def load_interactions(
@@ -36,19 +37,23 @@ def energy_calc(
     variant: pd.DataFrame,
     wild_type: pd.DataFrame,
     mutations: pd.DataFrame,
+    bar: ProgressMixin
 ) -> Dict[str, pd.DataFrame or Dict[str, pd.DataFrame]]:
-
+    bar.progress(5)
     results = interaction_analysis(variant, wild_type, mutations.index.tolist())
+    bar.progress(25)
     salt_changes = interaction_analysis(
         salt_bridges(variant),
         salt_bridges(wild_type),
         mutations.index.tolist()
     )
+    bar.progress(35)
     sulfide_changes = interaction_analysis(
         sulfide_bonds(variant),
         sulfide_bonds(wild_type),
         mutations.index.tolist()
     )
+    bar.progress(45)
     hbonds_v = hydrogen_bonds(variant)
     hbonds_w = hydrogen_bonds(wild_type)
     hbonds_sc_sc = interaction_analysis(
@@ -56,21 +61,25 @@ def energy_calc(
         hbonds_w['sc_sc'],
         mutations.index.tolist()
     )
+    bar.progress(55)
     hbonds_bb_sc = interaction_analysis(
         hbonds_v['bb_sc'],
         hbonds_w['bb_sc'],
         mutations.index.tolist()
     )
+    bar.progress(65)
     hbonds_bb_bb_sr = interaction_analysis(
         hbonds_v['bb_bb_sr'],
         hbonds_w['bb_bb_sr'],
         mutations.index.tolist()
     )
+    bar.progress(75)
     hbonds_bb_bb_lr = interaction_analysis(
         hbonds_v['bb_bb_lr'],
         hbonds_w['bb_bb_lr'],
         mutations.index.tolist()
     )
+    bar.progress(85)
     data = [
         {x.upper(): len(y) for x, y in results.items()},
         {x.upper(): round(y['total'].sum(), 4) for x, y in results.items()},
@@ -83,6 +92,7 @@ def energy_calc(
         {x.upper(): len(y) for x, y in hbonds_bb_bb_sr.items()},
         {x.upper(): len(y) for x, y in hbonds_bb_bb_lr.items()}
     ]
+    bar.progress(95)
     data = pd.DataFrame(data)
     data.index = [
         'Changes',
@@ -96,7 +106,7 @@ def energy_calc(
         'BB-BB-SR HBonds',
         'BB-BB-LR HBonds'
     ]
-
+    bar.progress(99)
     return {
         'summary': data,
         'all_changes': results,

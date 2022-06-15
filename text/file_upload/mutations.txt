@@ -1,0 +1,3 @@
+A CSV file of all the mutations between the wild-type and variant. Needs
+to have 3 columns. The position, the one-letter code for wild-type, and the
+one-letter code for the variant at that position. An example file is provided.
