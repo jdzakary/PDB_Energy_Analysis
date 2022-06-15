@@ -2,6 +2,7 @@ import json
 import pandas as pd
 import streamlit as st
 from utility import load_text
+from lib.energy_breakdown import energy_calc
 
 
 def change_types() -> None:
@@ -43,10 +44,10 @@ def main():
     st.write(load_text('interaction_changes', 'introduction'))
     change_types()
     st.header('Execute the Analysis')
-    if check_files():
-        st.success('Checking Uploaded Files: Success')
-    else:
+    if not check_files():
         st.error('Error: Not all required files are Uploaded!')
+        return
+    st.success('Checking Uploaded Files: Success')
 
 
 if __name__ == '__main__':
