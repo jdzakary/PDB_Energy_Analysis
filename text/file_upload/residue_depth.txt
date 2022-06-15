@@ -1,0 +1,2 @@
+To identify various qualities such as buried unsatisfied hydrogen bonds,
+it is useful to know the depth of each residue from the surface.
