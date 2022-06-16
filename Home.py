@@ -25,7 +25,7 @@ def main():
     st.header('Reset the Application')
     st.error('Warning! This will Clear all Data!')
     st.button('Reset', on_click=clear_session)
-    load_logo()
+    #load_logo()
 
 
 if __name__ == '__main__':

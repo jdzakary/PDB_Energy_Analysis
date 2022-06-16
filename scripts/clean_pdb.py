@@ -1,10 +1,10 @@
 import pandas as pd
 import os
+import re
 
 
 def renumber_pdb(
         filename: str,
-        offset: int,
         save_path: str
 ) -> None:
     """
@@ -12,10 +12,6 @@ def renumber_pdb(
     offset
     :param filename:
         The input file
-    :param offset:
-        How much to shift the sequence. If your sequence starts at 5,
-        you would want to use an offset of -4 to shift all residue numbers
-        so that the first residue starts at 1
     :param save_path:
         The path to save the cleaned PDB
     :return:
@@ -23,10 +19,10 @@ def renumber_pdb(
     """
     with open(filename, 'r') as file:
         raw = file.read().split('\n')
+    rows = [x for x in raw if x[0:4] == 'ATOM']
+    offset = 1 - find_start(rows[0])
     with open('temp.txt', 'w') as file:
-        file.write(
-            '\n'.join([x for x in raw if x[0:4] == 'ATOM'])
-        )
+        file.write('\n'.join(rows))
     data = pd.read_fwf('temp.txt', header=None, infer_nrows=2000)
     os.remove('temp.txt')
     data.columns = [
@@ -57,6 +53,19 @@ def adjust_pdb(x: str) -> str:
     if x[0].isnumeric() and initial == 3:
         x += ' '
     return x
+
+
+def find_start(data: str) -> int:
+    start = data.find(re.findall(r'\w\w\w \w', data)[0]) + 5
+    number = ''
+    final = False
+    while len(number) == 0 or not final:
+        if data[start].isnumeric():
+            number += data[start]
+        elif len(number) > 0:
+            final = True
+        start += 1
+    return int(number)
 
 
 if __name__ == '__main__':
