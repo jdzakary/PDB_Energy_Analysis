@@ -1,0 +1,3 @@
+Energy breakdown files are created by the Rosetta protocol residue_energy_breakdown.static.linuxgccrelease.
+The protocol generates a ".out" file, which needs to be converted into a ".csv" file.
+A python script is provided that can both run the Rosetta protocol and convert the output into a CSV
