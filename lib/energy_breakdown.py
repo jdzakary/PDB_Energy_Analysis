@@ -1,8 +1,11 @@
 import json
+import sys
+import os
 import pandas as pd
 from typing import List, Dict, Tuple, Hashable
 from streamlit.uploaded_file_manager import UploadedFile
 from streamlit.elements.progress import ProgressMixin
+sys.path.append(os.path.dirname(__file__))
 from rosetta import rosetta_simple
 
 

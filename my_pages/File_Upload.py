@@ -7,7 +7,8 @@ from typing import List
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import ResidueDepth
 from functools import partial
-from multiprocessing import Process
+from threading import Thread
+from streamlit.scriptrunner.script_run_context import add_script_run_ctx
 
 with open('lib/aa_map.json', 'r') as file:
     aa_map = json.load(file)
@@ -20,19 +21,10 @@ files = {
     'pdb_variant': {
         'label': 'PDB Structure: Variant',
         'type': ['pdb'],
-    },
-    'energy_wild': {
-        'label': 'Energy Breakdown: Wild-Type',
-        'type': ['csv']
-    },
-    'energy_variant': {
-        'label': 'Energy Breakdown: Variant',
-        'type': ['csv']
     }
 }
 
 KEY = 1
-TASKS: List[Process] = []
 
 
 def new_files():
@@ -128,9 +120,9 @@ def find_start(data: str) -> int:
 
 
 def clean_pdb() -> None:
-    for file in ['pdb_wild', 'pdb_variant']:
-        if st.session_state[file] is not None:
-            renumber_pdb(file)
+    for i in ['pdb_wild', 'pdb_variant']:
+        if st.session_state[i] is not None:
+            renumber_pdb(i)
     st.session_state['cleaned'] = True
     if 'mut_calc' in st.session_state.keys():
         st.session_state['mut_calc'] = False
@@ -169,11 +161,14 @@ def calculate_depth(file_name: str) -> None:
 def find_depth():
     for i in ['wild', 'variant']:
         if f'pdb_{i}_clean' in st.session_state.keys():
-            process = Process(target=partial(calculate_depth, file_name=i))
-            process.start()
-            TASKS.append(process)
-    if all([i for i in ['depth_wild', 'depth_varaint']]):
-        pass
+            task = Thread(target=partial(calculate_depth, file_name=i))
+            add_script_run_ctx(task)
+            task.start()
+
+
+def find_energy():
+    with open('testing.txt', 'w') as this_file:
+        this_file.write('Hello Word!')
 
 
 def main():
@@ -200,8 +195,7 @@ def main():
     st.button(label='Clean PDB Files', on_click=clean_pdb)
     st.button(label='Find Mutations', on_click=find_mutations)
     st.button(label='Calculate Depth', on_click=find_depth)
-    for i in TASKS:
-        st.write(i.exitcode)
+    st.button(label='Calculate Energy', on_click=find_energy)
 
 
 if __name__ == '__main__':

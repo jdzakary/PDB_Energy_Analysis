@@ -22,8 +22,6 @@ def home() -> None:
     st.title('Energetic Analysis Tools')
     st.header('Introduction')
     st.write(load_text('home', 'introduction'))
-    st.header('External Programs')
-    st.write(load_text('home', 'external_tools'))
     st.header('Reset the Application')
     st.error('Warning! This will Clear all Data!')
     st.button('Reset', on_click=clear_session)
@@ -51,6 +49,9 @@ pages = {
 
 
 def main():
+    if 'depth_wild' in st.session_state.keys() and\
+       'depth_variant' in st.session_state.keys():
+        st.session_state['depth'] = True
     with st.sidebar:
         logo = load_logo()
         st.image(logo, use_column_width=True)
@@ -76,9 +77,16 @@ def main():
             success='Residue Depth Calculated',
             warning='PDB Files Changed, should re-calculate'
         )
+        file_status(
+            name='breakdown',
+            error='Energy Breakdown Not Calculated',
+            success='Energy Breakdown Calculated',
+            warning='PDB Files Changed, should re-calculate'
+        )
 
     pages[selected]()
 
 
 if __name__ == '__main__':
+    os.environ["NUMEXPR_MAX_THREADS"] = '8'
     main()
