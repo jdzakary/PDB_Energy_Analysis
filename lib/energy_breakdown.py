@@ -3,6 +3,23 @@ import pandas as pd
 from typing import List, Dict, Tuple, Hashable
 from streamlit.uploaded_file_manager import UploadedFile
 from streamlit.elements.progress import ProgressMixin
+from rosetta import rosetta_simple
+
+
+def run(
+    file_name: str,
+    save_path: str,
+    log_path: str
+):
+    executable = 'rosetta_linux/source/bin/' \
+                 'residue_energy_breakdownstatic.linuxgccrelease'
+    options = [
+        f'-in:file:s {file_name}',
+        f'-out:file:silent {save_path}'
+    ]
+    log = rosetta_simple(executable, options)
+    with open(log_path, 'w') as file:
+        file.write(log)
 
 
 def load_interactions(

@@ -1,0 +1,84 @@
+patches/D_AA.txt
+patches/CtermProtein.txt
+patches/NtermProtein.txt
+patches/disulfide.txt
+patches/protein_cutpoint_upper.txt
+patches/protein_cutpoint_lower.txt
+patches/VirtualBB.txt
+patches/protein_centroid_with_HA.txt
+patches/VirtualNterm.txt
+patches/N_acetylated.txt
+patches/C_methylamidated.txt
+patches/RepulsiveOnly_centroid.txt
+patches/ser_phosphorylated.txt
+patches/thr_phosphorylated.txt
+
+# Command-line selected.
+patches/ShoveBB.txt
+
+## DNA
+patches/nucleic/dna/LowerDNA.txt
+patches/nucleic/dna/UpperDNA.txt
+patches/nucleic/dna/VirtualDNAPhosphate.txt
+
+## RNA
+patches/nucleic/rna/LowerRNA.txt
+patches/nucleic/rna/UpperRNA.txt
+patches/nucleic/rna/Virtual_Phosphate.txt
+
+##fpd
+#patches/CtermTruncation.txt
+#patches/NtermTruncation.txt
+
+## Branching patches
+#patches/branching/C-terminal_conjugation.txt  # Something is broken with this patch. ~Labonte
+patches/branching/S-linked_conjugation.txt
+patches/branching/N-linked_conjugation.txt
+patches/branching/O-linked_conjugation.txt
+
+## carbohydrate patches (These are currently direct copies of the fa patches.)
+### termini
+patches/carbohydrates/lower_terminus.txt
+patches/carbohydrates/upper_terminus.txt
+patches/carbohydrates/Me_glycoside.txt
+### cutpoints
+patches/carbohydrates/cutpoint_lower.txt
+patches/carbohydrates/cutpoint_upper.txt
+### branching
+patches/carbohydrates/N-linked_glycosylation.txt
+patches/carbohydrates/C-linked_glycosylation.txt
+patches/carbohydrates/2-branch.txt
+patches/carbohydrates/3-branch.txt
+patches/carbohydrates/4-branch.txt
+patches/carbohydrates/6-branch.txt
+### modifications
+patches/carbohydrates/2-amination.txt
+patches/carbohydrates/3-amination.txt
+patches/carbohydrates/3-methylation.txt
+patches/carbohydrates/N-acetyl-2-amination.txt
+patches/carbohydrates/N-R-3'-hydroxybutyryl-3-amination.txt
+patches/carbohydrates/N2-acetylation.txt
+patches/carbohydrates/N4-acetylation.txt
+patches/carbohydrates/N5-acetylation.txt
+patches/carbohydrates/O6-acetylation.txt
+patches/carbohydrates/2-sulfation.txt
+patches/carbohydrates/6-sulfation.txt
+patches/carbohydrates/2-sulfamidation.txt
+patches/carbohydrates/omega-oxidation.txt
+patches/carbohydrates/2-reduction.txt
+patches/carbohydrates/4-reduction.txt
+patches/carbohydrates/O1-lactylation.txt
+patches/carbohydrates/O2-lactylation.txt
+patches/carbohydrates/O3-lactylation.txt
+patches/carbohydrates/O4-lactylation.txt
+patches/carbohydrates/O6-lactylation.txt
+patches/carbohydrates/1-fluorination.txt
+patches/carbohydrates/2-fluorination.txt
+patches/carbohydrates/3-fluorination.txt
+patches/carbohydrates/4-fluorination.txt
+patches/carbohydrates/6-fluorination.txt
+patches/carbohydrates/1-phosphorylation.txt
+patches/carbohydrates/2-phosphorylation.txt
+patches/carbohydrates/3-phosphorylation.txt
+patches/carbohydrates/4-phosphorylation.txt
+patches/carbohydrates/6-phosphorylation.txt

@@ -134,6 +134,8 @@ def clean_pdb() -> None:
     st.session_state['cleaned'] = True
     if 'mut_calc' in st.session_state.keys():
         st.session_state['mut_calc'] = False
+    if 'depth' in st.session_state.keys():
+        st.session_state['depth'] = False
 
 
 def find_mutations() -> None:
@@ -152,7 +154,7 @@ def re_upload(key: str):
 def calculate_depth(file_name: str) -> None:
     parser = PDBParser()
     parser.QUIET = True
-    pdb_file = st.session_state[file_name]
+    pdb_file = st.session_state[f'pdb_{file_name}_clean']
     structure = parser.get_structure(0, pdb_file)
     pdb_file.seek(0)
     rd = ResidueDepth(
@@ -160,18 +162,18 @@ def calculate_depth(file_name: str) -> None:
         msms_exec='lib/msms_linux/msms.x86_64Linux2.2.6.1'
     )
     results = {x[1][1]: y[0] for x, y in rd.property_dict.items()}
+    st.session_state[f'depth_{file_name}'] = results
     print(f'Finished with {file_name}')
 
 
 def find_depth():
-    with st.spinner('Calculating Depth'):
-        for i in ['pdb_wild_clean', 'pdb_variant_clean']:
-            if i in st.session_state.keys():
-                process = Process(
-                    target=partial(calculate_depth, file_name=i)
-                )
-                process.start()
-                TASKS.append(process)
+    for i in ['wild', 'variant']:
+        if f'pdb_{i}_clean' in st.session_state.keys():
+            process = Process(target=partial(calculate_depth, file_name=i))
+            process.start()
+            TASKS.append(process)
+    if all([i for i in ['depth_wild', 'depth_varaint']]):
+        pass
 
 
 def main():

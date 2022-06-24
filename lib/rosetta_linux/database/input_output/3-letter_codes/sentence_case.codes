@@ -1,0 +1,44 @@
+# A list of custom 3-letter codes for residues and their Rosetta equivalents.
+# This file is primarily used for unit testing and as an example, but it would
+# work as advertised if someone really wanted sentence-case amino acid residue
+# 3-letter codes in their PDB files for some bizarro reason.
+
+# To allow these codes, use the options flag
+# -alternate_3_letter_codes lower_case.codes
+
+# (This file is used in unit testing; do not modify without changing the unit
+# test accordingly!)
+
+#       Rosetta                  Default       Patches/
+# Code  Code     Default HETNAM  Connectivity  Modifications  Comments
+  Ala   ALA                                                   # Alanine does not need a deafult HETNAM record; it only has one possible main-chain connectivity; and it requires no patches.
+  Arg   ARG
+  Asn   ASN
+  Asp   ASP
+  Cys   CYS
+  Glu   GLU
+  Gln   GLN
+  Gly   GLY
+  Hcy   HCY      HOMOCYSTEINE
+  His   HIS
+  Hyp   HYP      HYDROXYPROLINE
+  Ile   ILE
+  Leu   LEU
+  Lys   LYS
+  Met   MET
+  Nva   NVA      NORVALINE
+  Orn   ORN      ORNITHINE
+  Phe   PHE
+  Pro   PRO
+  Ser   SER
+  Thr   THR
+  Trp   TRP
+  Tyr   TYR
+  Val   VAL
+
+
+# The following line is purely for demonstration/testing purposes:
+
+#       Rosetta                  Default       Patches/
+# Code  Code     Default HETNAM  Connectivity  Modifications  Comments
+  Foo   FOO      FOOBARINE       9             Woo Hoo        # What?

@@ -1,0 +1,323 @@
+## fullatom protein c-terminus patch
+
+NAME CtermProteinFull
+TYPES UPPER_TERMINUS_VARIANT
+
+## general requirements for this patch
+
+BEGIN_SELECTOR
+PROPERTY PROTEIN META_ARAMID
+NOT VARIANT_TYPE UPPER_TERMINUS_VARIANT
+NOT VARIANT_TYPE UPPERTERM_TRUNC_VARIANT
+NOT PROPERTY PHOSPHONATE
+END_SELECTOR
+
+## now we search for a case that matches the residue, take the first one
+## so put generic case last
+
+BEGIN_CASE ### Triazolemer linker ##########################################
+
+BEGIN_SELECTOR
+PROPERTY TRIAZOLE_LINKER
+END_SELECTOR
+
+## these are the operations involved
+
+ADD_ATOM  OXT OOC OC -0.67
+ADD_BOND C OXT
+SET_BACKBONE_HEAVYATOM OXT
+
+## making these up:
+
+SET_ICOOR O     0.0 60 1.2 C C4 N3
+SET_ICOOR OXT 180.0 60 1.2 C C4 O ## phi == 180 --> planar
+
+## modify properties of existing atoms
+
+SET_ATOM_TYPE O OOC
+SET_ATOM_TYPE C COO
+SET_MM_ATOM_TYPE O OC
+SET_MM_ATOM_TYPE C CC
+SET_ATOMIC_CHARGE C 0.34
+SET_ATOMIC_CHARGE O -0.67
+
+SET_POLYMER_CONNECT UPPER NONE
+ADD_PROPERTY UPPER_TERMINUS ## implies terminus
+
+END_CASE
+
+
+BEGIN_CASE ### Gamma-amino acids ##########################################
+
+BEGIN_SELECTOR
+PROPERTY GAMMA_AA
+END_SELECTOR
+
+## these are the operations involved
+
+ADD_ATOM  OXT OOC OC -0.67
+ADD_BOND C OXT
+SET_BACKBONE_HEAVYATOM OXT
+
+## making these up:
+
+SET_ICOOR O     0.0 60 1.2 C C2 C3
+SET_ICOOR OXT 180.0 60 1.2 C C2 O ## phi == 180 --> planar
+
+## modify properties of existing atoms
+
+SET_ATOM_TYPE O OOC
+SET_ATOM_TYPE C COO
+SET_MM_ATOM_TYPE O OC
+SET_MM_ATOM_TYPE C CC
+SET_ATOMIC_CHARGE C 0.34
+SET_ATOMIC_CHARGE O -0.67
+
+SET_POLYMER_CONNECT UPPER NONE
+ADD_PROPERTY UPPER_TERMINUS ## implies terminus
+
+END_CASE
+
+
+BEGIN_CASE ### Beta-amino acids #############################################
+
+BEGIN_SELECTOR
+PROPERTY BETA_AA
+END_SELECTOR
+
+## these are the operations involved
+
+ADD_ATOM  OXT OOC OC -0.67
+ADD_BOND C OXT
+SET_BACKBONE_HEAVYATOM OXT
+
+## making these up:
+
+SET_ICOOR O    -80.0 60 1.2 C CM CA
+SET_ICOOR OXT -180.0 60 1.2 C CM O ## phi == 180 --> planar
+
+## modify properties of existing atoms
+
+SET_ATOM_TYPE O OOC
+SET_ATOM_TYPE C COO
+SET_MM_ATOM_TYPE O OC
+SET_MM_ATOM_TYPE C CC
+SET_ATOMIC_CHARGE C 0.34
+SET_ATOMIC_CHARGE O -0.67
+
+SET_POLYMER_CONNECT UPPER NONE
+ADD_PROPERTY UPPER_TERMINUS ## implies terminus
+
+END_CASE
+
+BEGIN_CASE ### SRI's special backbones ###################################
+
+BEGIN_SELECTOR
+PROPERTY SRI
+END_SELECTOR
+
+## these are the operations involved
+
+ADD_ATOM  OXT OOC OC -0.67
+ADD_BOND C6 OXT
+SET_BACKBONE_HEAVYATOM OXT
+
+## making these up:
+
+SET_ICOOR O1  80.0 60 1.2 C6 C5 C4
+SET_ICOOR OXT 180.0 60 1.2 C6 C5 O1 ## phi == 180 --> planar
+
+## modify properties of existing atoms
+
+SET_ATOM_TYPE O1 OOC
+SET_ATOM_TYPE C6 COO
+SET_MM_ATOM_TYPE O1 OC
+SET_MM_ATOM_TYPE C6 CC
+SET_ATOMIC_CHARGE C6 0.34
+SET_ATOMIC_CHARGE O1 -0.67
+
+SET_POLYMER_CONNECT UPPER NONE
+ADD_PROPERTY UPPER_TERMINUS ## implies terminus
+
+END_CASE
+
+BEGIN_CASE ### L-Oligoureas ##########################################
+
+BEGIN_SELECTOR
+PROPERTY L_AA
+PROPERTY OLIGOUREA
+END_SELECTOR
+
+## these are the operations involved
+
+ADD_ATOM  OXT OOC OC -0.6079
+ADD_BOND C OXT
+SET_BACKBONE_HEAVYATOM OXT
+
+## making these up:
+
+SET_ICOOR O    80.0 60 1.2 C NU CM
+SET_ICOOR OXT 180.0 60 1.2 C NU O ## phi == 180 --> planar
+
+## modify properties of existing atoms
+
+SET_ATOM_TYPE O OOC
+SET_ATOM_TYPE C COO
+SET_MM_ATOM_TYPE O OC
+SET_MM_ATOM_TYPE C CC
+SET_ATOMIC_CHARGE C 0.2158
+SET_ATOMIC_CHARGE O -0.6079
+
+SET_POLYMER_CONNECT UPPER NONE
+ADD_PROPERTY UPPER_TERMINUS ## implies terminus
+
+END_CASE
+
+BEGIN_CASE ### D-Oligoureas ##########################################
+
+BEGIN_SELECTOR
+PROPERTY D_AA
+PROPERTY OLIGOUREA
+END_SELECTOR
+
+## these are the operations involved
+
+ADD_ATOM  OXT OOC OC -0.6079
+ADD_BOND C OXT
+SET_BACKBONE_HEAVYATOM OXT
+
+## making these up:
+
+SET_ICOOR O    -80.0 60 1.2 C NU CM
+SET_ICOOR OXT -180.0 60 1.2 C NU O ## phi == 180 --> planar
+
+## modify properties of existing atoms
+
+SET_ATOM_TYPE O OOC
+SET_ATOM_TYPE C COO
+SET_MM_ATOM_TYPE O OC
+SET_MM_ATOM_TYPE C CC
+SET_ATOMIC_CHARGE C 0.2158
+SET_ATOMIC_CHARGE O -0.6079
+
+SET_POLYMER_CONNECT UPPER NONE
+ADD_PROPERTY UPPER_TERMINUS ## implies terminus
+
+END_CASE
+
+BEGIN_CASE ### D-amino acids #############################################
+
+BEGIN_SELECTOR
+PROPERTY D_AA
+END_SELECTOR
+
+## these are the operations involved
+
+ADD_ATOM  OXT OOC OC -0.6079
+ADD_BOND C OXT
+SET_BACKBONE_HEAVYATOM OXT
+
+## making these up:
+
+SET_ICOOR O    -80.0 60 1.2 C CA N
+SET_ICOOR OXT -180.0 60 1.2 C CA O ## phi == 180 --> planar
+
+## modify properties of existing atoms
+
+SET_ATOM_TYPE O OOC
+SET_ATOM_TYPE C COO
+SET_MM_ATOM_TYPE O OC
+SET_MM_ATOM_TYPE C CC
+SET_ATOMIC_CHARGE C 0.2158
+SET_ATOMIC_CHARGE O -0.6079
+
+SET_POLYMER_CONNECT UPPER NONE
+ADD_PROPERTY UPPER_TERMINUS ## implies terminus
+
+END_CASE
+
+BEGIN_CASE ### TPL -- tryptophanol, no O -- just make it an OH
+BEGIN_SELECTOR
+NAME3 TPL
+END_SELECTOR
+
+## these are the operations involved
+
+ADD_ATOM  OXT OH   OH1 -0.5094419
+ADD_ATOM  HXT Hpol H   -0.3319091
+ADD_BOND C OXT
+ADD_BOND OXT HXT
+SET_BACKBONE_HEAVYATOM OXT
+
+## making these up:
+
+SET_ICOOR OXT  59.972931 70.478287 1.428429   C CA N
+# Hs relative to OXT
+SET_ICOOR HXT 179.956314 73.168350 0.967403   OXT C CA  ## phi == 180 --> planar
+SET_ICOOR HC1 119.955666 70.542175 1.090395   C CA OXT ## phi == 180 --> planar
+SET_ICOOR HC2 119.967216 70.485359 1.088822   C CA OXT ## phi == 180 --> planar
+
+SET_POLYMER_CONNECT UPPER NONE
+ADD_PROPERTY UPPER_TERMINUS ## implies terminus
+
+END_CASE
+
+
+BEGIN_CASE ### THE GENERAL CASE ##########################################
+
+BEGIN_SELECTOR
+PROPERTY META_ARAMID
+END_SELECTOR
+
+## these are the operations involved
+
+ADD_ATOM  OXT OOC OC -0.6079
+ADD_BOND C OXT
+SET_BACKBONE_HEAVYATOM OXT
+
+## making these up:
+
+SET_ICOOR O    80.0 60 1.2 C CA CB1
+SET_ICOOR OXT 180.0 60 1.2 C CA O ## phi == 180 --> planar
+
+## modify properties of existing atoms
+
+SET_ATOM_TYPE O OOC
+SET_ATOM_TYPE C COO
+SET_MM_ATOM_TYPE O OC
+SET_MM_ATOM_TYPE C CC
+SET_ATOMIC_CHARGE C 0.2158
+SET_ATOMIC_CHARGE O -0.6079
+
+SET_POLYMER_CONNECT UPPER NONE
+ADD_PROPERTY UPPER_TERMINUS ## implies terminus
+
+END_CASE
+
+BEGIN_CASE ### THE GENERAL CASE ##########################################
+
+## these are the operations involved
+
+ADD_ATOM  OXT OOC OC -0.6079
+ADD_BOND C OXT
+SET_BACKBONE_HEAVYATOM OXT
+
+## making these up:
+
+SET_ICOOR O    80.0 60 1.2 C CA N
+SET_ICOOR OXT 180.0 60 1.2 C CA O ## phi == 180 --> planar
+
+## modify properties of existing atoms
+
+SET_ATOM_TYPE O OOC
+SET_ATOM_TYPE C COO
+SET_MM_ATOM_TYPE O OC
+SET_MM_ATOM_TYPE C CC
+SET_ATOMIC_CHARGE C 0.2158
+SET_ATOMIC_CHARGE O -0.6079
+
+SET_POLYMER_CONNECT UPPER NONE
+ADD_PROPERTY UPPER_TERMINUS ## implies terminus
+
+END_CASE
+
