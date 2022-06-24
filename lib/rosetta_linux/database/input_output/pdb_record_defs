@@ -1,0 +1,84 @@
+# A listing of PDB record definitions.
+
+# See http://wwpdb.org/documentation/file-format-content/format33/v3.3.html
+
+# Whitespace-delimited.
+# The 1st 6 characters/columns of each record are the record type and must be
+# present.
+
+# Record   Field  Column   Field           Column   Field         Column
+# Type     Name    Range   Name             Range   Name           Range   Etc....
+
+# Title Section ###############################################################
+  HEADER   type    1   6   classification  11  50   depDate       51  59   idCode        63  66
+  OBSLTE   type    1   6   continuation     9  10   repDate       12  20   idCode        22  25 # Note: The OBSLTE record should also contain additional rIdCode fields.
+  TITLE    type    1   6   continuation     9  10   title         11  70
+  SPLIT    type    1   6   continuation     9  10   idCode        12  15  # Note: The SPLIT record should also contain additional idCode fields.
+  CAVEAT   type    1   6   continuation     9  10   idCode        12  15   comment       20  79
+  COMPND   type    1   6   continuation     9  10   compound      11  70  # should be from 11 to 80
+  SOURCE   type    1   6   continuation     8  10   srcName       11  79
+  KEYWDS   type    1   6   continuation     9  10   keywords      11  79  # should be keywds
+  EXPDTA   type    1   6   continuation     9  10   technique     11  70
+  NUMMD    type    1   6   modelNumber     11  14
+  MDLTYP   type    1   6   continuation     9  10   comment       11  80
+  AUTHOR   type    1   6   continuation     9  10   authorList    11  79
+  REVDAT   type    1   6   modNum           8  10   continuation  11  12   modDate       14  22   modID        24  27   modType      32  32   record      40  45  # Note: The REVDAT record should also contain additional record fields.
+  SPRSDE   type    1   6   continuation     9  10   sprsdeDate    12  20   idCode        22  25   sIdCode      32  35  # Note: The SPRSDE record should also contain additional sIdCode fields.
+  JRNL     type    1   6   text            13  79
+  REMARK   type    1   6   remarkNum        8  10   value         12  70  # non-standard name should be empty
+
+# Primary Structure Section ###################################################
+  DBREF    type    1   6   idCode           8  11   chainID       13  13   seqBegin      15  18   insertBegin  19  19   seqEnd       21  24   insertEnd   25  25   database     27  32   dbAccession  34  41   dbIdCode    43  54   dbseqBegin  56  60   idbnsBeg    61  61   dbseqEnd    63  67   dbinsEnd   68  68
+  DBREF1   type    1   6   idCode           8  11   chainID       13  13   seqBegin      15  18   insertBegin  19  19   seqEnd       21  24   insertEnd   25  25   database     27  32   dbIdCode     48  67
+  DBREF2   type    1   6   idCode           8  11   chainID       13  13   dbAccession   19  40   seqBegin     46  55   seqEnd       58  67
+  SEQADV   type    1   6   idCode           8  11   resName       13  15   chainID       17  17   seqNum       19  22   iCode        23  23   database    25  28   dbAccession  30  38   dbRes        40  42   dbSeq       44  48   conflict    50  70
+  SEQRES   type    1   6   serNum           8  10   chainID       12  12   numRes        14  17   resName1     20  22   resName2     24  26   resName3    28  30   resName4     32  34   resName5     36  38   resName6    40  42   resName7    44  46   resName8    48  50   resName9    52  54   resName10  56  58   resName11   60  62   resName12   64  66   resName13  68  70
+  MODRES   type    1   6   idCode           8  11   resName       13  15   chainID       17  17   seqNum       19  22   iCode        23  23   stdRes      25  27   comment      30  70
+
+# Heterogen Section ###########################################################
+  HET      type    1   6   hetID            8  10   ChainID       13  13   seqNum        14  17   iCode        18  18   numHetAtoms  21  25   text        31  70
+  HETNAM   type    1   6   continuation     9  10   hetID         12  14   text          16  70  # HET identifier right-justified; chemical name
+  HETSYN   type    1   6   continuation     9  10   hetID         12  14   hetSynonyms   16  70
+  FORMUL   type    1   6   compNum          9  10   hetID         13  15   continuation  17  18   asterisk     19  19   text         20  70
+
+# Secondary Structure Section #################################################
+  HELIX    type    1   6   serNum           8  10   helixID       12  14   initResName   16  18   initChainID  20  20   initSeqNum   22  25   initICode   26  26   endResName   28  30   endChainID   32  32   endSeqNum   34  37   endICode    38  38   helixClass  39  40   comment     41  70   length     72  76
+  SHEET    type    1   6   strand           8  10   sheetID       12  14   numStrands    15  16   initResName  18  20   initChainID  22  22   initSeqNum  23  26   initICode    27  27   endResName   29  31   endChainID  33  33   endSeqNum   34  37   endICode    38  38   sense       39  40   curAtom    42  45   curResName  46  48   curChainId  50  50   curResSeq  51  54   curICode  55  55   prevAtom  42  45   prevResName  46  48   prevChainId  50  50   prevResSeq  51  54   prevICode  55  55
+
+# Connectivity Annotation Section #############################################
+  SSBOND   type    1   6   serNum           8  10   resName1      12  14   chainID1      16  16   resSeq1      18  21   iCode1       22  22   resName2    26  28   chainID2     30  30   resSeq2      32  35   iCode2      36  36   sym1        60  65   sym2        67  72   length      74  78  # non-standard names: should be seqNum1 and seqNum2
+  LINK     type    1   6   name1           13  16   altLoc1       17  17   resName1      18  20   chainID1     22  22   resSeq1      23  26   iCode1      27  27   name2        43  46   altLoc2      47  47   resName2    48  50   chainID2    52  52   resSeq2     53  56   iCode2      57  57   sym1       60  65   sym2        67  72   length      74  78
+  CISPEP   type    1   6   serNum           8  10   pep1          12  14   chainID1      16  16   seqNum1      18  21   icode1       22  22   pep2        26  28   chainID2     30  30   seqNum2      32  35   icode2      36  36   modNum      44  46   measure     54  59  # Real(6.2)
+
+# Miscellaneous Features Section ##############################################
+  SITE     type    1   6   seqNum           8  10   siteID        12  14   numRes        16  17   resName1     19  21   chainID1     23  23   seq1        24  27   iCode1       28  28   resName2     30  32   chainID2    34  34   seq2        35  38   iCode2      39  39   resName3    41  43   chainID3   45  45   seq3        46  49   iCode3      50  50   resName4   52  54   chainID4  56  56   seq4      57  60   iCode4       61  61
+
+# Crystallographic & Coordinate Transformation Section ########################
+  CRYST1   type    1   6   a                7  15   b             16  24   c             25  33   alpha        34  40   beta         41  47   gamma       48  54   spacegroup   56  66   z            67  70
+  ORIGX1   type    1   6   o[1][1]         11  20   o[1][2]       21  30   o[1][3]       31  40   t[1]         46  55  #  All Reals are 10.6 formatted, except for t, which is 10.5.
+  ORIGX2   type    1   6   o[2][1]         11  20   o[2][2]       21  30   o[2][3]       31  40   t[2]         46  55  #  All Reals are 10.6 formatted, except for t, which is 10.5.
+  ORIGX3   type    1   6   o[3][1]         11  20   o[3][2]       21  30   o[3][3]       31  40   t[3]         46  55  #  All Reals are 10.6 formatted, except for t, which is 10.5.
+  SCALE1   type    1   6   s[1][1]         11  20   s[1][2]       21  30   s[1][3]       31  40   u[1]         46  55  #  All Reals are 10.6 formatted, except for t, which is 10.5.
+  SCALE2   type    1   6   s[2][1]         11  20   s[2][2]       21  30   s[2][3]       31  40   u[2]         46  55  #  All Reals are 10.6 formatted, except for t, which is 10.5.
+  SCALE3   type    1   6   s[3][1]         11  20   s[3][2]       21  30   s[3][3]       31  40   u[3]         46  55  #  All Reals are 10.6 formatted, except for t, which is 10.5.
+  MTRIX1   type    1   6   serial           8  10   m[1][1]       11  20   m[1][2]       21  30   m[1][3]      31  40   v[1]         46  55   iGiven      60  60  #  All Reals are 10.6 formatted, except for t, which is 10.5.
+  MTRIX2   type    1   6   serial           8  10   m[2][1]       11  20   m[2][2]       21  30   m[2][3]      31  40   v[2]         46  55   iGiven      60  60  #  All Reals are 10.6 formatted, except for t, which is 10.5.
+  MTRIX3   type    1   6   serial           8  10   m[3][1]       11  20   m[3][2]       21  30   m[3][3]      31  40   v[3]         46  55   iGiven      60  60  #  All Reals are 10.6 formatted, except for t, which is 10.5.
+
+# Coordinate Section ##########################################################
+  MODEL    type    1   6   serial          11  14
+  ATOM     type    1   6   serial           7  11   name          13  16   altLoc        17  17   resName      18  20   chainID      22  22   resSeq      23  26   iCode        27  27   x            31  38   y           39  46   z           47  54   occupancy   55  60   tempFactor  61  66   segmentID  73  76   element     77  78   charge      79  80  # Standard would have been segID.
+  ANISOU   type    1   6   serial           7  11   name          13  16   altLoc        17  17   resName      18  20   chainID      22  22   resSeq      23  26   iCode        27  27   u[0][0]      29  35   u[1][1]     36  42   u[2][2]     43  49   u[0][1]     50  56   u[0][2]     57  63   u[1][2]    64  70   element     77  78   charge      79  80
+  TER      type    1   6   serial           7  11   resName       18  20   chainID       22  22   resSeq       23  26   iCode        27  27
+  HETATM   type    1   6   serial           7  11   name          13  16   altLoc        17  17   resName      18  20   chainID      22  22   resSeq      23  26   iCode        27  27   x            31  38   y           39  46   z           47  54   occupancy   55  60   tempFactor  61  66   segmentID  73  76   element     77  78   charge      79  80  # Standard would have been segID.
+  ENDMDL   type    1   6  # Record contains only a single field, its type.
+
+# Connectivity Section ########################################################
+  CONECT   type    1   6   serial0          7  11   serial1       12  16   serial2       17  21   serial3      22  26   serial4      27  31  # non-standard names
+
+# Bookkeeping Section #########################################################
+  MASTER   type    1   6   numRemark       11  15   zero          16  20   numHet        21  25   numHelix     26  30   numSheet     31  35   numTurn     36  40   numSite      41  45   numXform     46  50   numCoord    51  55   numTer      56  60   numConect   61  65   numSeq      66  70
+  END      type    1   6  # Record contains only a single field, its type.
+
+# Unknown Type ################################################################
+  UNKNOW   info    1   0  # Zero means that the string will size based on contents.
