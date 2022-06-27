@@ -51,6 +51,10 @@ pages = {
 
 def main():
     with st.sidebar:
+        st.markdown(
+            body="<h1 style='text-align: center;'>Kuenze Lab</h1>",
+            unsafe_allow_html=True
+        )
         logo = load_logo()
         st.image(logo, use_column_width=True)
         selected = st.selectbox(

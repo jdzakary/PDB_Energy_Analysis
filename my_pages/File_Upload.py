@@ -11,6 +11,7 @@ from Bio.PDB.ResidueDepth import ResidueDepth
 from functools import partial
 from threading import Thread
 from streamlit.scriptrunner.script_run_context import add_script_run_ctx
+from utility import load_text
 
 with open('lib/aa_map.json', 'r') as my_file:
     aa_map = json.load(my_file)
@@ -225,9 +226,20 @@ def main():
                 )
                 KEY += 1
 
+    st.subheader('Cleaning PDB Files')
+    st.write(load_text('file_upload', 'pdb_files'))
     st.button(label='Clean PDB Files', on_click=clean_pdb)
+
+    st.subheader('Determining Mutations')
+    st.write(load_text('file_upload', 'mutations'))
     st.button(label='Find Mutations', on_click=find_mutations)
+
+    st.subheader('Residue Depth')
+    st.write(load_text('file_upload', 'residue_depth'))
     st.button(label='Calculate Depth', on_click=find_depth)
+
+    st.subheader('Rosetta Energy Breakdown Protocol')
+    st.write(load_text('file_upload', 'energy_files'))
     st.button(label='Calculate Energy', on_click=find_energy)
 
 
