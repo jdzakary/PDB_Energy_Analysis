@@ -14,8 +14,9 @@ def run(
     save_path: str,
     log_path: str
 ):
-    executable = 'rosetta_linux/source/bin/' \
-                 'residue_energy_breakdownstatic.linuxgccrelease'
+    folder = os.path.dirname(__file__)
+    executable = f'{folder}/rosetta_linux/source/bin/' \
+                 'residue_energy_breakdown.static.linuxgccrelease'
     options = [
         f'-in:file:s {file_name}',
         f'-out:file:silent {save_path}'
@@ -25,27 +26,23 @@ def run(
         file.write(log)
 
 
-def load_interactions(
-    energy_variant: UploadedFile,
-    energy_wild: UploadedFile,
-    mutations: UploadedFile
-) -> Dict[str, pd.DataFrame]:
-    variant = pd.read_csv(energy_variant)
-    wild_type = pd.read_csv(energy_wild)
-    mutations = pd.read_csv(mutations)
+def convert_outfile(
+    file_name: str,
+    save_path: str,
+) -> None:
+    spacer = len(file_name) - 17
+    with open(file_name, 'r') as file:
+        data = file.read()
+    lines = data.split('\n')
+    lines[0] = lines[0][0:6] + ' '*spacer + lines[0][6:]
 
-    variant.drop(variant[variant['resi2'] == '--'].index, inplace=True)
-    wild_type.drop(wild_type[wild_type['resi2'] == '--'].index, inplace=True)
-    variant['resi2'] = variant['resi2'].astype(int)
-    wild_type['resi2'] = wild_type['resi2'].astype(int)
+    with open(f'{file_name[:-3]}txt', 'w') as file:
+        file.write('\n'.join(lines))
 
-    mutations.sort_values(by='Position', inplace=True)
-    mutations.set_index(keys='Position', inplace=True)
-    return {
-        'variant': variant,
-        'wild_type': wild_type,
-        'mutations': mutations
-    }
+    data = pd.read_fwf(f'{file_name[:-3]}txt')
+    data.drop(columns=['description', 'SCORE:', 'pose_id'], inplace=True)
+    data.to_csv(save_path, index=False)
+    os.remove(f'{file_name[:-3]}txt')
 
 
 def load_depth(file: UploadedFile) -> Dict[int, float]:
