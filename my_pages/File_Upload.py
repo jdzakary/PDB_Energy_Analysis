@@ -1,7 +1,9 @@
 import json
+import os
 import re
 import streamlit as st
 import pandas as pd
+import lib.energy_breakdown as eb
 from io import StringIO
 from typing import List
 from Bio.PDB.PDBParser import PDBParser
@@ -10,8 +12,8 @@ from functools import partial
 from threading import Thread
 from streamlit.scriptrunner.script_run_context import add_script_run_ctx
 
-with open('lib/aa_map.json', 'r') as file:
-    aa_map = json.load(file)
+with open('lib/aa_map.json', 'r') as my_file:
+    aa_map = json.load(my_file)
 
 files = {
     'pdb_wild': {
@@ -91,6 +93,7 @@ def mutations() -> pd.DataFrame:
         counter += 1
     results = pd.DataFrame(results)
     results.columns = ['Position', 'Mutated', 'Wild']
+    results.sort_values(by='Position', inplace=True)
     results.set_index(keys='Position', inplace=True)
     return results
 
@@ -128,6 +131,8 @@ def clean_pdb() -> None:
         st.session_state['mut_calc'] = False
     if 'depth' in st.session_state.keys():
         st.session_state['depth'] = False
+    if 'breakdown' in st.session_state.keys():
+        st.session_state['breakdown'] = False
 
 
 def find_mutations() -> None:
@@ -158,17 +163,45 @@ def calculate_depth(file_name: str) -> None:
     print(f'Finished with {file_name}')
 
 
+def calculate_energy(file_type: str) -> None:
+    assert f'pdb_{file_type}_clean' in st.session_state.keys()
+    pdb_file: StringIO = st.session_state[f'pdb_{file_type}_clean']
+    with open(f'lib/storage/{file_type}.pdb', 'w') as file:
+        file.write(pdb_file.read())
+    pdb_file.seek(0)
+    eb.run(
+        file_name=f'lib/storage/{file_type}.pdb',
+        save_path=f'lib/storage/energy_{file_type}.out',
+        log_path=f'lib/storage/log_{file_type}.txt'
+    )
+    eb.convert_outfile(
+        file_name=f'lib/storage/energy_{file_type}.out',
+        save_path=f'lib/storage/energy_{file_type}.csv'
+    )
+    energy = pd.read_csv(f'lib/storage/energy_{file_type}.csv')
+    energy.drop(energy[energy['resi2'] == '--'].index, inplace=True)
+    energy['resi2'] = energy['resi2'].astype(int)
+    st.session_state[f'energy_{file_type}'] = energy
+    os.remove(f'lib/storage/energy_{file_type}.csv')
+    os.remove(f'lib/storage/energy_{file_type}.out')
+
+
 def find_depth():
     for i in ['wild', 'variant']:
         if f'pdb_{i}_clean' in st.session_state.keys():
+            st.session_state['depth'] = True
             task = Thread(target=partial(calculate_depth, file_name=i))
             add_script_run_ctx(task)
             task.start()
 
 
 def find_energy():
-    with open('testing.txt', 'w') as this_file:
-        this_file.write('Hello Word!')
+    for i in ['wild', 'variant']:
+        if f'pdb_{i}_clean' in st.session_state.keys():
+            st.session_state['breakdown'] = True
+            task = Thread(target=partial(calculate_energy, i))
+            add_script_run_ctx(task)
+            task.start()
 
 
 def main():

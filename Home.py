@@ -49,9 +49,6 @@ pages = {
 
 
 def main():
-    if 'depth_wild' in st.session_state.keys() and\
-       'depth_variant' in st.session_state.keys():
-        st.session_state['depth'] = True
     with st.sidebar:
         logo = load_logo()
         st.image(logo, use_column_width=True)
