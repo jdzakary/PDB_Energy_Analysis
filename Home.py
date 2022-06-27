@@ -2,7 +2,7 @@ import streamlit as st
 import sys
 import os
 from PIL import Image
-from my_pages import File_Upload, Interaction_Analysis
+from my_pages import File_Upload, Interaction_Analysis, Residue_Depth
 sys.path.append(os.path.dirname(__file__))
 from utility import load_text
 
@@ -44,7 +44,8 @@ def file_status(
 pages = {
     'Home': home,
     'File Upload': File_Upload.main,
-    'Interaction Analysis': Interaction_Analysis.main
+    'Interaction Analysis': Interaction_Analysis.main,
+    'Residue Depth': Residue_Depth.main
 }
 
 

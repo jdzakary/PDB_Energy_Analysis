@@ -2,3 +2,7 @@
 # streamlit cloud has difficulty detecting the biopython dependancy.
 # All other dependencies are automatically detected and downloaded accordingly.
 biopython==1.79
+pandas==1.4.2
+streamlit==1.10.0
+pillow==9.0.1
+bokeh==2.4.1
