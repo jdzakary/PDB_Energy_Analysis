@@ -1,1 +1,4 @@
+# Obviously this is not the only requirement. This file exists because
+# streamlit cloud has difficulty detecting the biopython dependancy.
+# All other dependencies are automatically detected and downloaded accordingly.
 biopython==1.79
