@@ -19,12 +19,14 @@ def load_logo() -> Image:
 
 
 def home() -> None:
-    st.title('Energetic Analysis Tools')
-    st.header('Introduction')
-    st.write(load_text('home', 'introduction'))
-    st.header('Reset the Application')
-    st.error('Warning! This will Clear all Data!')
-    st.button('Reset', on_click=clear_session)
+    left, center, right = st.columns([1, 2, 1])
+    with center:
+        st.title('Energetic Analysis Tools')
+        st.header('Introduction')
+        st.write(load_text('home', 'introduction'))
+        st.header('Reset the Application')
+        st.error('Warning! This will Clear all Data!')
+        st.button('Reset', on_click=clear_session)
 
 
 def file_status(
@@ -50,6 +52,11 @@ pages = {
 
 
 def main():
+    st.set_page_config(
+        page_title='Energy Tools',
+        page_icon='images/lab_icon.png',
+        layout='wide'
+    )
     with st.sidebar:
         st.markdown(
             body="<h1 style='text-align: center;'>Kuenze Lab</h1>",

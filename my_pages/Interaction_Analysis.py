@@ -69,13 +69,10 @@ def change_checkbox(label: str, key: str) -> None:
 def display_changes(label: str) -> None:
     global KEY
     switch = st.session_state['check']
-    columns = st.columns(
-        sum([len(x) > 0 for x in st.session_state['results'][label]])
-    )
-    i = 0
+    container = st.container()
     for key, value in st.session_state['results'][label].items():
         if len(value):
-            columns[i].checkbox(
+            container.checkbox(
                 label=f'Type {key.upper()}',
                 value=switch[label][key],
                 key=KEY,
@@ -84,49 +81,50 @@ def display_changes(label: str) -> None:
             if switch[label][key]:
                 st.write(f'Changes of Type {key.upper()}')
                 st.table(value[['resi1', 'resi2', 'total']])
-            i += 1
             KEY += 1
 
 
 def main():
-    if 'complete' not in st.session_state.keys():
-        st.session_state['complete'] = False
-    if 'check' not in st.session_state.keys():
-        st.session_state['check'] = {
-            x: {
-                y: False for y in ['a', 'b', 'c', 'd', 'e', 'f']
-            } for x in categories.keys()
-        }
+    left, center, right = st.columns([1, 2, 1])
+    with center:
+        if 'complete' not in st.session_state.keys():
+            st.session_state['complete'] = False
+        if 'check' not in st.session_state.keys():
+            st.session_state['check'] = {
+                x: {
+                    y: False for y in ['a', 'b', 'c', 'd', 'e', 'f']
+                } for x in categories.keys()
+            }
 
-    st.title('Changes in Pairwise Interactions')
+        st.title('Changes in Pairwise Interactions')
 
-    st.header('Introduction')
-    st.write(load_text('interaction_changes', 'introduction'))
-    change_types()
+        st.header('Introduction')
+        st.write(load_text('interaction_changes', 'introduction'))
+        change_types()
 
-    st.header('Execute the Analysis')
-    if not check_files():
-        st.error('Error: Not all Pre-requisites are calculated')
-        return
-    st.success('Checking Pre-requisites: Success!')
+        st.header('Execute the Analysis')
+        if not check_files():
+            st.error('Error: Not all Pre-requisites are calculated')
+            return
+        st.success('Checking Pre-requisites: Success!')
 
-    container = st.container()
-    analysis_bar = st.progress(100 if st.session_state['complete'] else 0)
-    container.button(
-        label='Start Calculations',
-        on_click=lambda: start_calculations(analysis_bar),
-        disabled=st.session_state['complete']
-    )
-    if not st.session_state['complete']:
-        return
-    st.success('Successfully Executed Analysis and Stored the Results')
+        container = st.container()
+        analysis_bar = st.progress(100 if st.session_state['complete'] else 0)
+        container.button(
+            label='Start Calculations',
+            on_click=lambda: start_calculations(analysis_bar),
+            disabled=st.session_state['complete']
+        )
+        if not st.session_state['complete']:
+            return
+        st.success('Successfully Executed Analysis and Stored the Results')
 
-    st.header('Results')
-    with st.expander('Summary', expanded=True):
-        st.table(st.session_state['results']['summary'])
-    for key, value in categories.items():
-        with st.expander(value):
-            display_changes(key)
+        st.header('Results')
+        with st.expander('Summary', expanded=True):
+            st.table(st.session_state['results']['summary'])
+        for key, value in categories.items():
+            with st.expander(value):
+                display_changes(key)
 
 
 if __name__ == '__main__':
