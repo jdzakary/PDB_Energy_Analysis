@@ -2,9 +2,11 @@ import streamlit as st
 import sys
 import os
 from PIL import Image
-from my_pages import File_Upload, Interaction_Analysis, Residue_Depth
-sys.path.append(os.path.dirname(__file__))
+from my_pages import (
+    File_Upload, Interaction_Analysis, Residue_Depth, Energy_Heatmap
+)
 from utility import load_text
+sys.path.append(os.path.dirname(__file__))
 
 
 def clear_session() -> None:
@@ -47,7 +49,8 @@ pages = {
     'Home': home,
     'File Upload': File_Upload.main,
     'Interaction Analysis': Interaction_Analysis.main,
-    'Residue Depth': Residue_Depth.main
+    'Residue Depth': Residue_Depth.main,
+    'Energy Heatmap': Energy_Heatmap.main
 }
 
 

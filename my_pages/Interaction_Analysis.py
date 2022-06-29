@@ -125,7 +125,3 @@ def main():
         for key, value in categories.items():
             with st.expander(value):
                 display_changes(key)
-
-
-if __name__ == '__main__':
-    main()

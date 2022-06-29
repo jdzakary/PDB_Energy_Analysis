@@ -239,7 +239,3 @@ def main():
         st.subheader('Rosetta Energy Breakdown Protocol')
         st.write(load_text('file_upload', 'energy_files'))
         st.button(label='Calculate Energy', on_click=find_energy)
-
-
-if __name__ == '__main__':
-    main()
