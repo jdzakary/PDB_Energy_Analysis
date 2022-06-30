@@ -8,9 +8,15 @@ def simple_show() -> None:
     pdb_file: StringIO = st.session_state[f'pdb_wild_clean']
     structure = pdb_file.read()
     pdb_file.seek(0)
-    view = py3Dmol.view(width=400, height=400)
+    view = py3Dmol.view()
     view.addModel(structure, 'wild')
-    view.setStyle({'stick': {}})
+    view.setStyle(
+        {
+            'cartoon': {
+                'color': 'green'
+            }
+        }
+    )
     view.zoomTo()
     showmol(view, height=500, width=800)
 
