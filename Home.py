@@ -2,9 +2,12 @@ import streamlit as st
 import sys
 import os
 from PIL import Image
-from my_pages import File_Upload, Interaction_Analysis
-sys.path.append(os.path.dirname(__file__))
+from my_pages import (
+    File_Upload, Interaction_Analysis, Residue_Depth, Energy_Heatmap,
+    Structure_View
+)
 from utility import load_text
+sys.path.append(os.path.dirname(__file__))
 
 
 def clear_session() -> None:
@@ -19,12 +22,14 @@ def load_logo() -> Image:
 
 
 def home() -> None:
-    st.title('Energetic Analysis Tools')
-    st.header('Introduction')
-    st.write(load_text('home', 'introduction'))
-    st.header('Reset the Application')
-    st.error('Warning! This will Clear all Data!')
-    st.button('Reset', on_click=clear_session)
+    left, center, right = st.columns([1, 2, 1])
+    with center:
+        st.title('Energetic Analysis Tools')
+        st.header('Introduction')
+        st.write(load_text('home', 'introduction'))
+        st.header('Reset the Application')
+        st.error('Warning! This will Clear all Data!')
+        st.button('Reset', on_click=clear_session)
 
 
 def file_status(
@@ -44,12 +49,24 @@ def file_status(
 pages = {
     'Home': home,
     'File Upload': File_Upload.main,
-    'Interaction Analysis': Interaction_Analysis.main
+    'Interaction Analysis': Interaction_Analysis.main,
+    'Residue Depth': Residue_Depth.main,
+    'Energy Heatmap': Energy_Heatmap.main,
+    'Structure View': Structure_View.main
 }
 
 
 def main():
+    st.set_page_config(
+        page_title='Energy Tools',
+        page_icon='images/lab_icon.png',
+        layout='wide'
+    )
     with st.sidebar:
+        st.markdown(
+            body="<h1 style='text-align: center;'>Kuenze Lab</h1>",
+            unsafe_allow_html=True
+        )
         logo = load_logo()
         st.image(logo, use_column_width=True)
         selected = st.selectbox(

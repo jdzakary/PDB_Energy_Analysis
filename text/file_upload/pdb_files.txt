@@ -1,5 +1,2 @@
-PDB files need to adhere to specific formatting rules in order for the tools to work correctly. Namely,
-they should be renumbered so that the first residue in the sequence is at position 1 and there are no
-gaps in numbering. Additionally, there should not be any other excess information contained in the file.
-The PDB files should only contain ATOM records, which also means that multichain structures are
-not supported.
+PDB files must be cleaned in order to be parsed correctly. Additionally, they
+must also be renumbered so that the first residue in the file is at position 1.

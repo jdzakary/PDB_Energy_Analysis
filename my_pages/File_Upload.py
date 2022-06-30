@@ -11,6 +11,7 @@ from Bio.PDB.ResidueDepth import ResidueDepth
 from functools import partial
 from threading import Thread
 from streamlit.scriptrunner.script_run_context import add_script_run_ctx
+from utility import load_text
 
 with open('lib/aa_map.json', 'r') as my_file:
     aa_map = json.load(my_file)
@@ -205,19 +206,17 @@ def find_energy():
 
 
 def main():
+    left, center, right = st.columns([1, 2, 1])
     global KEY
-    st.title('Upload Necessary Data')
-
-    for key, value in files.items():
-        if key not in st.session_state.keys() or st.session_state[key] is None:
-            file_uploader(key, value)
-        else:
-            col1, col2 = st.columns([3, 1])
-            with col1:
+    with center:
+        st.title('Upload Necessary Data')
+        for key, value in files.items():
+            if key not in st.session_state.keys() or st.session_state[key] is None:
+                file_uploader(key, value)
+            else:
                 st.success(
                     f'{key} is uploaded --- {st.session_state[key].name}'
                 )
-            with col2:
                 st.button(
                     label='Re-upload?',
                     key=KEY,
@@ -225,11 +224,18 @@ def main():
                 )
                 KEY += 1
 
-    st.button(label='Clean PDB Files', on_click=clean_pdb)
-    st.button(label='Find Mutations', on_click=find_mutations)
-    st.button(label='Calculate Depth', on_click=find_depth)
-    st.button(label='Calculate Energy', on_click=find_energy)
+        st.subheader('Cleaning PDB Files')
+        st.write(load_text('file_upload', 'pdb_files'))
+        st.button(label='Clean PDB Files', on_click=clean_pdb)
 
+        st.subheader('Determining Mutations')
+        st.write(load_text('file_upload', 'mutations'))
+        st.button(label='Find Mutations', on_click=find_mutations)
 
-if __name__ == '__main__':
-    main()
+        st.subheader('Residue Depth')
+        st.write(load_text('file_upload', 'residue_depth'))
+        st.button(label='Calculate Depth', on_click=find_depth)
+
+        st.subheader('Rosetta Energy Breakdown Protocol')
+        st.write(load_text('file_upload', 'energy_files'))
+        st.button(label='Calculate Energy', on_click=find_energy)
