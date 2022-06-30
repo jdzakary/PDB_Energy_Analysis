@@ -7,7 +7,7 @@ from bokeh.plotting import figure, ColumnDataSource
 from bokeh.models import LinearColorMapper, ColorBar, DataTable, TableColumn
 from bokeh.transform import transform
 from bokeh.models.tools import (
-    WheelZoomTool, ResetTool, PanTool, TapTool, BoxSelectTool
+    WheelZoomTool, ResetTool, PanTool, TapTool, BoxSelectTool, SaveTool
 )
 from bokeh.models.callbacks import CustomJS
 from bokeh.layouts import gridplot
@@ -83,13 +83,14 @@ def create_heatmap(
     pan_tool = PanTool()
     tap_tool = TapTool()
     poly = BoxSelectTool()
+    save = SaveTool()
     tool_tips = [
         ('Resi1', '@x'),
         ('Resi2', '@y'),
         ('Total Energy', '@total{0.000}')
     ]
     plot = figure(
-        tools=[reset, wheel_zoom, pan_tool, tap_tool, poly],
+        tools=[reset, wheel_zoom, pan_tool, tap_tool, poly, save],
         tooltips=tool_tips
     )
     plot.title = f'Interaction Energy Pairs for {file_name.capitalize()}'

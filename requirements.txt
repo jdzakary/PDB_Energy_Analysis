@@ -10,3 +10,5 @@ numpy==1.22.3
 seaborn==0.11.2
 matplotlib==3.5.1
 colorcet==3.0.0
+py3dmol==1.8.0
+stmol==0.0.7

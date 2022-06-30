@@ -3,7 +3,8 @@ import sys
 import os
 from PIL import Image
 from my_pages import (
-    File_Upload, Interaction_Analysis, Residue_Depth, Energy_Heatmap
+    File_Upload, Interaction_Analysis, Residue_Depth, Energy_Heatmap,
+    Structure_View
 )
 from utility import load_text
 sys.path.append(os.path.dirname(__file__))
@@ -50,7 +51,8 @@ pages = {
     'File Upload': File_Upload.main,
     'Interaction Analysis': Interaction_Analysis.main,
     'Residue Depth': Residue_Depth.main,
-    'Energy Heatmap': Energy_Heatmap.main
+    'Energy Heatmap': Energy_Heatmap.main,
+    'Structure View': Structure_View.main
 }
 
 

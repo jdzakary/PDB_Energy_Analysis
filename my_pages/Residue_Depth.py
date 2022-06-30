@@ -3,7 +3,9 @@ import streamlit as st
 from typing import Dict
 from bokeh.plotting import figure, ColumnDataSource
 from bokeh.models import CustomJS, DataTable, TableColumn
-from bokeh.models.tools import WheelZoomTool, ResetTool, PanTool, TapTool
+from bokeh.models.tools import (
+    WheelZoomTool, ResetTool, PanTool, TapTool, SaveTool
+)
 from bokeh.layouts import gridplot
 from bokeh.models.widgets import Slider, CheckboxGroup
 
@@ -109,13 +111,14 @@ def create_plot(file_name: str) -> dict:
     wheel_zoom = WheelZoomTool()
     pan_tool = PanTool()
     tap_tool = TapTool()
+    save = SaveTool()
     tool_tips = [
         ('Position', '@position'),
         ('Depth', '@x'),
         ('Net Energy', '@y')
     ]
     plot = figure(
-        tools=[reset, wheel_zoom, pan_tool, tap_tool],
+        tools=[reset, wheel_zoom, pan_tool, tap_tool, save],
         tooltips=tool_tips
     )
     plot.title = f'{file_name.capitalize()}: Net Energy vs Depth'
@@ -166,6 +169,8 @@ def plot_master() -> None:
     # Create Scatter Plots
     wild = create_plot('wild')
     variant = create_plot('variant')
+    wild['plot'].x_range = variant['plot'].x_range
+    wild['plot'].y_range = variant['plot'].y_range
 
     # Slider to control scatter point sizes
     slider = Slider(
