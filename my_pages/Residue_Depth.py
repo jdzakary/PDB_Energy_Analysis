@@ -8,16 +8,13 @@ from bokeh.layouts import gridplot
 from bokeh.models.widgets import Slider, CheckboxGroup
 
 
-def check_files(file_name: str) -> bool:
+def check_files() -> bool:
     constraints = [
-        f'depth_{file_name}' in st.session_state.keys(),
-        f'energy_{file_name}' in st.session_state.keys()
+        'depth_wild' in st.session_state.keys(),
+        'energy_wild' in st.session_state.keys(),
+        'depth_variant' in st.session_state.keys(),
+        'energy_variant' in st.session_state.keys()
     ]
-    if file_name == 'variant':
-        constraints.extend([
-            f'depth_wild' in st.session_state.keys(),
-            f'energy_wild' in st.session_state.keys()
-        ])
     return all(constraints)
 
 
@@ -252,7 +249,7 @@ def plot_master() -> None:
 
 def main():
     st.title('Residue Depth in the Protein')
-    if check_files('wild') and check_files('variant'):
+    if check_files():
         plot_master()
     else:
-        st.error('Not all Pre-requisites are calculated')
+        st.error('Not all Pre-Requisites are Calculated')
