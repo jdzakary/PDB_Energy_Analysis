@@ -7,7 +7,7 @@ from bokeh.models.tools import (
     WheelZoomTool, ResetTool, PanTool, TapTool, SaveTool
 )
 from bokeh.layouts import gridplot
-from bokeh.models.widgets import Slider, CheckboxGroup
+from bokeh.models.widgets import Slider, CheckboxGroup, TextInput
 
 
 def check_files() -> bool:
@@ -240,10 +240,24 @@ def plot_master() -> None:
             )
         )
 
+    # Text Box to Select Residue by Entering number
+    text = TextInput(title='Enter Residue ID:')
+    text.js_on_change(
+        'value',
+        CustomJS(
+            args=dict(
+                source=wild['source']
+            ),
+            code="""
+            source.selected.indices = [parseInt(this.value) - 1];
+            """
+        )
+    )
+
     # Organize all components in Bokeh Grid
     st.bokeh_chart(
         gridplot([
-            [slider],
+            [slider, text],
             [check_wild, check_variant],
             [wild['plot'], variant['plot']],
             [wild['table'], variant['table']]

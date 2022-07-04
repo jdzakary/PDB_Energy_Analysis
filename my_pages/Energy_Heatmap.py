@@ -10,7 +10,9 @@ from bokeh.models.tools import (
     WheelZoomTool, ResetTool, PanTool, TapTool, BoxSelectTool, SaveTool
 )
 from bokeh.models.callbacks import CustomJS
-from bokeh.layouts import gridplot
+from bokeh.layouts import gridplot, column
+from bokeh.models.widgets import Slider, Button
+from lib.visualization import WebViewer
 
 
 ROWS = [
@@ -70,12 +72,15 @@ def fill_holes() -> Dict[str, pd.DataFrame]:
 
     cw.sort_values(by=['resi1', 'resi2'], inplace=True)
     cv.sort_values(by=['resi1', 'resi2'], inplace=True)
+    cw.reset_index(inplace=True, drop=True)
+    cv.reset_index(inplace=True, drop=True)
     return {'wild': cw, 'variant': cv}
 
 
 def create_heatmap(
     file_name: str,
-    data: pd.DataFrame
+    data: pd.DataFrame,
+    extrema: int = 5
 ) -> dict:
     # Setup Bokeh Plot
     reset = ResetTool()
@@ -110,8 +115,8 @@ def create_heatmap(
     # Create Heatmap
     mapper = LinearColorMapper(
         palette=cc.b_linear_bmy_10_95_c78,
-        low=-5,
-        high=5
+        low=-extrema,
+        high=extrema
     )
     plot.rect(
         source=source,
@@ -131,7 +136,7 @@ def create_heatmap(
     }
 
 
-def plot_master() -> None:
+def plot_side() -> None:
     # Create Heatmaps
     df = fill_holes()
     wild = create_heatmap('wild', df['wild'])
@@ -184,6 +189,8 @@ def plot_master() -> None:
             code=read_js(1)
         )
     )
+
+    # JS Code Linking Selection to Table
     wild['source'].selected.js_on_change(
         'indices',
         CustomJS(
@@ -197,6 +204,7 @@ def plot_master() -> None:
         )
     )
 
+    # Show Bokeh Chart
     st.bokeh_chart(
         gridplot([
             [wild['plot'], variant['plot'], table],
@@ -204,9 +212,156 @@ def plot_master() -> None:
     )
 
 
+def plot_difference() -> None:
+    # Create Data and Heatmaps
+    df = fill_holes()
+    data = df['variant'] - df['wild']
+    data['resi1'] = df['wild']['resi1']
+    data['resi2'] = df['variant']['resi2']
+    diff = create_heatmap('Difference', data, extrema=2)
+
+    # Bokeh Table
+    source_table = ColumnDataSource(
+        data=dict(
+            energy=ROWS,
+            diff=[0] * len(ROWS)
+        )
+    )
+    table = DataTable(
+        source=source_table,
+        columns=[
+            TableColumn(field='energy', title='Energy Term'),
+            TableColumn(field='diff', title='Difference')
+        ],
+        index_position=None,
+        width=200,
+        height=535
+    )
+
+    # JS Code Linking Selection to Table
+    diff['source'].selected.js_on_change(
+        'indices',
+        CustomJS(
+            args=dict(
+                diff=diff['source'],
+                rows=ROWS,
+                table=source_table
+            ),
+            code=read_js(3)
+        )
+    )
+
+    # JS Code to Jump to Specific Area of Map
+    slider_x = Slider(
+        title='Resi1',
+        start=1,
+        end=258,
+        value=50,
+        step=1
+    )
+    slider_y = Slider(
+        title='Resi2',
+        start=1,
+        end=258,
+        value=50,
+        step=1
+    )
+    submit = Button(
+        label='Go To Interaction Area'
+    )
+    submit.js_on_click(
+        CustomJS(
+            args=dict(
+                slider_x=slider_x,
+                slider_y=slider_y,
+                x=diff['plot'].x_range,
+                y=diff['plot'].y_range
+            ),
+            code="""
+            x.start = slider_x.value - 15;
+            x.end = slider_x.value + 15;
+            y.start = slider_y.value - 15;
+            y.end = slider_y.value + 15;
+            """
+        )
+    )
+
+    st.bokeh_chart(
+        gridplot([
+            [diff['plot'], table, column([slider_x, slider_y, submit])]
+        ])
+    )
+
+
+def select_mode() -> str:
+    state: dict = st.session_state['energy_heatmap']
+    if 'mode' not in state.keys():
+        state['mode'] = 0
+    radio = st.radio(
+        label='Select Mode',
+        options=['Difference', 'Side-by-Side'],
+        horizontal=True
+    )
+    return radio
+
+
+def resi_energy_map(
+    wild: pd.DataFrame,
+    variant: pd.DataFrame,
+    colormap: list[str],
+    min_value: float,
+    max_value: float
+) -> Dict[int, str]:
+    resi_max = max(
+        wild['resi1'].values.tolist() + wild['resi2'].values.tolist()
+    )
+    energy: dict[int, float] = {}
+    for i in range(1, resi_max + 1):
+        energy_wild = wild[
+            (wild['resi1'] == i) | (wild['resi2'] == i)
+        ]['total'].sum()
+        energy_variant = variant[
+            (variant['resi1'] == i) | (variant['resi2'] == i)
+        ]['total'].sum()
+        energy[i] = energy_variant - energy_wild
+    results = {}
+    for key, value in energy.items():
+        if value < min_value:
+            results[key] = colormap[0]
+        elif value > max_value:
+            results[key] = colormap[-1]
+        else:
+            index = (value - min_value) / (max_value - min_value)
+            results[key] = colormap[round(index * len(colormap))]
+    return results
+
+
+def view_difference() -> None:
+    st.header('3D Structure Heatmap')
+    viewer = WebViewer()
+    viewer.add_model('wild')
+    viewer.show_cartoon('wild', '#858282')
+    cartoon_color = resi_energy_map(
+        st.session_state['energy_wild'],
+        st.session_state['energy_variant'],
+        cc.b_linear_bmy_10_95_c78,
+        -4, 4
+    )
+    for resi, color in cartoon_color.items():
+        viewer.color_cartoon('wild', resi, color)
+    viewer.set_background('#E2DFDF')
+    viewer.show()
+
+
 def main():
+    if 'energy_heatmap' not in st.session_state.keys():
+        st.session_state['energy_heatmap'] = {}
     st.title('Energy Heatmap')
     if check_files():
-        plot_master()
+        if select_mode() == 'Side-by-Side':
+            plot_side()
+        else:
+            plot_difference()
+            view_difference()
     else:
         st.error('Not all Pre-Requisites are Calculated')
