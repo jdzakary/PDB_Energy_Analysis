@@ -145,5 +145,18 @@ class WebViewer:
             }
         )
 
+    def label_resi(self, file_name: str, resi: List[int]):
+        self.view.addResLabels(
+            {
+                'model': self.id_struct[file_name],
+                'resi': resi
+            },
+            {
+                'font': 'Arial',
+                'fontColor': 'black',
+                'showBackground': False
+            }
+        )
+
     def show(self):
         showmol(self.view, width=self.width, height=self.height)

@@ -57,7 +57,9 @@ def energy_calc(
     bar: ProgressMixin
 ) -> Dict[str, pd.DataFrame or Dict[str, pd.DataFrame]]:
     bar.progress(5)
-    results = interaction_analysis(variant, wild_type, mutations.index.tolist())
+    results = interaction_analysis(
+        variant, wild_type, mutations.index.tolist()
+    )
     bar.progress(25)
     salt_changes = interaction_analysis(
         salt_bridges(variant),

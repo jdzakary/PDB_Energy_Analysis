@@ -245,12 +245,32 @@ def plot_master() -> None:
     text.js_on_change(
         'value',
         CustomJS(
-            args=dict(
-                source=wild['source']
-            ),
+            args=dict(source=wild['source']),
             code="""
             source.selected.indices = [parseInt(this.value) - 1];
             """
+        )
+    )
+
+    # JS Code Linking Table Selection
+    wild['source_copy'].selected.js_on_change(
+        'indices',
+        CustomJS(
+            args=dict(
+                source=wild['source_copy'],
+                other=variant['source_copy']
+            ),
+            code=read_js(4)
+        )
+    )
+    variant['source_copy'].selected.js_on_change(
+        'indices',
+        CustomJS(
+            args=dict(
+                source=variant['source_copy'],
+                other=wild['source_copy']
+            ),
+            code=read_js(4)
         )
     )
 

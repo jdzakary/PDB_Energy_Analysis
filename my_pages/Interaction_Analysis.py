@@ -4,6 +4,9 @@ import streamlit as st
 from utility import load_text
 from functools import partial
 from lib.energy_breakdown import energy_calc
+from st_aggrid import (
+    AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
+)
 
 KEY = 1
 categories = {
@@ -12,7 +15,8 @@ categories = {
     'hbonds_sc_sc': 'Hydrogen Bonds: Side-Chain to Side-Chain',
     'hbonds_bb_sc': 'Hydrogen Bonds: Side-Chain to Backbone',
     'hbonds_bb_bb_sr': 'Hydrogen Bonds: Backbone to Backbone Short Range',
-    'hbonds_bb_bb_lr': 'Hydrogen Bonds: Backbone to Backbone Long Range'
+    'hbonds_bb_bb_lr': 'Hydrogen Bonds: Backbone to Backbone Long Range',
+    'all_changes': 'All Interactions'
 }
 
 
@@ -84,6 +88,44 @@ def display_changes(label: str) -> None:
             KEY += 1
 
 
+def build_options(data: pd.DataFrame) -> dict:
+    gb = GridOptionsBuilder.from_dataframe(data)
+    gb.configure_default_column(resizable=False)
+    gb.configure_pagination(
+        paginationAutoPageSize=False,
+        paginationPageSize=30
+    )
+    gb.configure_column(
+        field='Resi2',
+        menuTabs=['generalMenuTab', 'filterMenuTab']
+    )
+    options = gb.build()
+    return options
+
+
+def ag_grid_changes(label: str) -> None:
+    data = []
+    for key, df in st.session_state['results'][label].items():
+        if len(df) > 0:
+            df: pd.DataFrame
+            new = df[['resi1', 'resi2', 'total']].values.tolist()
+            new = [x + [key.upper()] for x in new]
+            data.extend(new)
+    data = pd.DataFrame(data)
+    data.columns = ['Resi1', 'Resi2', 'Total', 'Change Type']
+    data['Total'] = data['Total'].round(3)
+    data.insert(0, 'Change Type', data.pop('Change Type'))
+    options = build_options(data)
+    grid_response = AgGrid(
+        dataframe=data,
+        data_return_mode=DataReturnMode.AS_INPUT,
+        update_mode=GridUpdateMode.NO_UPDATE,
+        gridOptions=options,
+        try_to_convert_back_to_original_types=False,
+        theme='streamlit'
+    )
+
+
 def main():
     left, center, right = st.columns([1, 2, 1])
     with center:
@@ -124,4 +166,4 @@ def main():
             st.table(st.session_state['results']['summary'])
         for key, value in categories.items():
             with st.expander(value):
-                display_changes(key)
+                ag_grid_changes(key)
