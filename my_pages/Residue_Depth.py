@@ -11,6 +11,10 @@ from bokeh.models.widgets import Slider, CheckboxGroup, TextInput
 
 
 def check_files() -> bool:
+    """
+    Check that necessary data exists in session state
+    :return:
+    """
     constraints = [
         'depth_wild' in st.session_state.keys(),
         'energy_wild' in st.session_state.keys(),
@@ -21,6 +25,11 @@ def check_files() -> bool:
 
 
 def changes() -> Dict[int, int]:
+    """
+    Determine if a residue is a mutation with better energy, mutation with
+    worse energy, or not a mutation.
+    :return:
+    """
     wild: pd.DataFrame = st.session_state['energy_wild']
     variant: pd.DataFrame = st.session_state['energy_variant']
     mutations: pd.DataFrame = st.session_state['mutations']
@@ -46,6 +55,12 @@ def changes() -> Dict[int, int]:
 
 @st.cache
 def read_js(version: int) -> str:
+    """
+    Read JS Code from file
+    :param version:
+        The serial number of the file to be read
+    :return:
+    """
     with open(f'js/residue_depth_{version}.js', 'r') as file:
         return file.read()
 
@@ -55,6 +70,13 @@ def create_source_wild(
     net: Dict[int, float],
     mut_map: Dict[int, int]
 ) -> ColumnDataSource:
+    """
+    Create the Bokeh ColumnDataSource for the wild-type
+    :param depth:
+    :param net:
+    :param mut_map:
+    :return:
+    """
     c1 = (9, 92, 224, 1)
     c2 = (224, 138, 9, 1)
     mut_list = [x != 0 for x in mut_map.values()]
@@ -75,6 +97,13 @@ def create_source_variant(
     net: Dict[int, float],
     mut_map: Dict[int, int]
 ) -> ColumnDataSource:
+    """
+    Create the Bokeh ColumnDataSource for the Variant
+    :param depth:
+    :param net:
+    :param mut_map:
+    :return:
+    """
     color_map = [(9, 92, 224, 1), (230, 9, 9, 1), (69, 214, 95, 1)]
     label_map = ['Conserved', 'Worse Energy', 'Better Energy']
     source = ColumnDataSource(
@@ -90,6 +119,12 @@ def create_source_variant(
 
 
 def create_plot(file_name: str) -> dict:
+    """
+    Create Bokeh Scatter plot components and tables to be assembled
+    in the plot master function
+    :param file_name:
+    :return:
+    """
     # Fetch Data from Streamlit Session State
     inter: pd.DataFrame = st.session_state[f'energy_{file_name}']
     depth: Dict[int: float] = st.session_state[f'depth_{file_name}']
@@ -166,6 +201,10 @@ def create_plot(file_name: str) -> dict:
 
 
 def plot_master() -> None:
+    """
+    Create and show the Bokeh Figure
+    :return:
+    """
     # Create Scatter Plots
     wild = create_plot('wild')
     variant = create_plot('variant')
@@ -287,6 +326,10 @@ def plot_master() -> None:
 
 
 def main():
+    """
+    Create the Residue Depth Main Page
+    :return:
+    """
     st.title('Residue Depth in the Protein')
     if check_files():
         plot_master()

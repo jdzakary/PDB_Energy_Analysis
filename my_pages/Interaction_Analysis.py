@@ -2,7 +2,6 @@ import json
 import pandas as pd
 import streamlit as st
 from utility import load_text
-from functools import partial
 from lib.energy_breakdown import energy_calc
 from st_aggrid import (
     AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
@@ -21,6 +20,10 @@ categories = {
 
 
 def change_types() -> None:
+    """
+    Display information explaining the 6 categories of changes
+    :return:
+    """
     data = pd.DataFrame([
         ['A', True, True, False],
         ['B', True, True, True],
@@ -47,13 +50,23 @@ def change_types() -> None:
 
 
 def check_files() -> bool:
+    """
+    Check that the required files exist in session state
+    :return:
+    """
     files = ['energy_wild', 'energy_variant', 'mutations']
     if any([x not in st.session_state.keys() for x in files]):
         return False
     return all([st.session_state[x] is not None for x in files])
 
 
+# TODO: Put this in a separate thread to prevent GUI Freeze
 def start_calculations(progress_bar) -> None:
+    """
+    Execute the interaction analysis
+    :param progress_bar:
+    :return:
+    """
     st.session_state['results'] = energy_calc(
         variant=st.session_state['energy_variant'],
         wild_type=st.session_state['energy_wild'],
@@ -63,32 +76,12 @@ def start_calculations(progress_bar) -> None:
     st.session_state['complete'] = True
 
 
-def change_checkbox(label: str, key: str) -> None:
-    if st.session_state['check'][label][key]:
-        st.session_state['check'][label][key] = False
-    else:
-        st.session_state['check'][label][key] = True
-
-
-def display_changes(label: str) -> None:
-    global KEY
-    switch = st.session_state['check']
-    container = st.container()
-    for key, value in st.session_state['results'][label].items():
-        if len(value):
-            container.checkbox(
-                label=f'Type {key.upper()}',
-                value=switch[label][key],
-                key=KEY,
-                on_change=partial(change_checkbox, label, key)
-            )
-            if switch[label][key]:
-                st.write(f'Changes of Type {key.upper()}')
-                st.table(value[['resi1', 'resi2', 'total']])
-            KEY += 1
-
-
 def build_options(data: pd.DataFrame) -> dict:
+    """
+    Configure options for the AgGrid Widget
+    :param data:
+    :return:
+    """
     gb = GridOptionsBuilder.from_dataframe(data)
     gb.configure_default_column(resizable=False)
     gb.configure_pagination(
@@ -103,7 +96,12 @@ def build_options(data: pd.DataFrame) -> dict:
     return options
 
 
-def ag_grid_changes(label: str) -> None:
+def display_changes(label: str) -> None:
+    """
+    Display the results in an AgGrid Widget
+    :param label:
+    :return:
+    """
     data = []
     for key, df in st.session_state['results'][label].items():
         if len(df) > 0:
@@ -127,6 +125,10 @@ def ag_grid_changes(label: str) -> None:
 
 
 def main():
+    """
+    Create the Interaction Analysis Main Page
+    :return:
+    """
     left, center, right = st.columns([1, 2, 1])
     with center:
         if 'complete' not in st.session_state.keys():
@@ -166,4 +168,4 @@ def main():
             st.table(st.session_state['results']['summary'])
         for key, value in categories.items():
             with st.expander(value):
-                ag_grid_changes(key)
+                display_changes(key)

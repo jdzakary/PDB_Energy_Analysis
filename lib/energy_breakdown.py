@@ -1,9 +1,7 @@
-import json
 import sys
 import os
 import pandas as pd
 from typing import List, Dict, Tuple, Hashable
-from streamlit.uploaded_file_manager import UploadedFile
 from streamlit.elements.progress import ProgressMixin
 sys.path.append(os.path.dirname(__file__))
 from rosetta import rosetta_simple
@@ -13,7 +11,17 @@ def run(
     file_name: str,
     save_path: str,
     log_path: str
-):
+) -> None:
+    """
+    Run the Rosetta Energy Breakdown Protocol in a Subprocess
+    :param file_name:
+        The input PDB file on disk
+    :param save_path:
+        Location to output the result file
+    :param log_path:
+        Location to save the log file
+    :return: None
+    """
     folder = os.path.dirname(__file__)
     executable = f'{folder}/rosetta_linux/source/bin/' \
                  'residue_energy_breakdown.static.linuxgccrelease'
@@ -30,6 +38,14 @@ def convert_outfile(
     file_name: str,
     save_path: str,
 ) -> None:
+    """
+    Convert the output of Rosetta Energy Breakdown to a CSV File
+    :param file_name:
+        Location of the output file
+    :param save_path:
+        Location to save the CSV file
+    :return: None
+    """
     spacer = len(file_name) - 17
     with open(file_name, 'r') as file:
         data = file.read()
@@ -45,17 +61,25 @@ def convert_outfile(
     os.remove(f'{file_name[:-3]}txt')
 
 
-def load_depth(file: UploadedFile) -> Dict[int, float]:
-    depth = json.load(file)
-    return {int(x): y for x, y in depth.items()}
-
-
 def energy_calc(
     variant: pd.DataFrame,
     wild_type: pd.DataFrame,
     mutations: pd.DataFrame,
     bar: ProgressMixin
 ) -> Dict[str, pd.DataFrame or Dict[str, pd.DataFrame]]:
+    """
+    Identify Important Changes in Interaction Energies
+    :param variant:
+        The residue energy breakdown for the variant structure
+    :param wild_type:
+        The residue energy breakdown for the wild-type structure
+    :param mutations:
+        The mutations between the wild-type and variant
+    :param bar:
+        The streamlit progressbar to push updates to
+    :return:
+        A dictionary containing assorted dataframes
+    """
     bar.progress(5)
     results = interaction_analysis(
         variant, wild_type, mutations.index.tolist()
@@ -138,17 +162,14 @@ def energy_calc(
     }
 
 
-def net_energy(
-    energy_variant: UploadedFile,
-    energy_wild: UploadedFile
-) -> float:
-    variant = pd.read_csv(energy_variant)
-    wild_type = pd.read_csv(energy_wild)
-    total_diff = variant["total"].sum() - wild_type["total"].sum()
-    return total_diff
-
-
 def salt_bridges(interactions: pd.DataFrame) -> pd.DataFrame:
+    """
+    Find Salt Bridges
+    :param interactions:
+        The residue energy breakdown dataframe
+    :return:
+        A dataframe of the salt bridge interactions
+    """
     query = interactions[
         (interactions['hbond_sc'] < 0) &
         (
@@ -166,6 +187,13 @@ def salt_bridges(interactions: pd.DataFrame) -> pd.DataFrame:
 
 
 def sulfide_bonds(interactions: pd.DataFrame) -> pd.DataFrame:
+    """
+    Find Disulfide Bonds
+    :param interactions:
+        The residue energy breakdown dataframe
+    :return:
+        A dataframe of the disulfide interactions
+    """
     query = interactions[
         (
             (interactions['restype1'] == 'CYS') &
@@ -177,6 +205,14 @@ def sulfide_bonds(interactions: pd.DataFrame) -> pd.DataFrame:
 
 
 def hydrogen_bonds(interactions: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+    """
+    Find Hydrogen Bonds
+    :param interactions:
+        The residue energy breakdown dataframe
+    :return:
+        A dictionary containing a dataframe of interactions
+         for each type of hydrogen bond
+    """
     sc_sc = interactions[interactions['hbond_sc'] < 0]
     bb_sc = interactions[interactions['hbond_bb_sc'] < 0]
     bb_bb_sr = interactions[interactions['hbond_sr_bb'] < 0]
@@ -194,6 +230,18 @@ def interaction_analysis(
     wild_type: pd.DataFrame,
     mutated: List[int]
 ) -> Dict[str, pd.DataFrame]:
+    """
+    Classify interactions into 6 categories
+    :param variant:
+        The residue energy breakdown for the variant
+    :param wild_type:
+        The residue energy breakdown for the wild-type
+    :param mutated:
+        The mutated residues between the variant and wild-type
+    :return:
+        A dictionary containing a dataframe of interactions for
+        each category
+    """
     position = ['resi1', 'resi2']
 
     position_v = variant[position].values.tolist()
@@ -287,6 +335,16 @@ def subtract_rows(
     row: Tuple[Hashable, pd.Series],
     df: pd.DataFrame
 ) -> list:
+    """
+    Subtract the numerical values of corresponding interactions
+    :param row:
+        The row whose values are being subtracted from
+    :param df:
+        The dataframe that contains the matching row whose values will
+        be used for subtraction
+    :return:
+        The adjusted values of the row, to be added into a new dataframe
+    """
     query = df[
         (df['resi1'] == row[1]['resi1']) &
         (df['resi2'] == row[1]['resi2'])
@@ -297,7 +355,7 @@ def subtract_rows(
 
 
 def buried_hbonds(
-    residue_depth: UploadedFile,
+    resi_depth: dict[int, float],
     threshold: float,
     hbonds_sc_sc: Dict[str, pd.DataFrame],
     hbonds_bb_sc: Dict[str, pd.DataFrame],
@@ -306,8 +364,18 @@ def buried_hbonds(
     unsatisfied: bool = True,
     **kwargs
 ) -> None:
-    data = load_depth(residue_depth)
-
+    """
+    An incomplete attempt to identify buried hydrogen bonds using residue depth
+    :param resi_depth:
+    :param threshold:
+    :param hbonds_sc_sc:
+    :param hbonds_bb_sc:
+    :param hbonds_bb_bb_lr:
+    :param hbonds_bb_bb_sr:
+    :param unsatisfied:
+    :param kwargs:
+    :return:
+    """
     frames = {
         f'sc_sc_{"c" if unsatisfied else "e"}': hbonds_sc_sc['c' if unsatisfied else 'e'],
         f'sc_sc_{"d" if unsatisfied else "f"}': hbonds_sc_sc['d' if unsatisfied else 'f'],
@@ -321,8 +389,8 @@ def buried_hbonds(
 
     for key, df in frames.items():
         for row in df.iterrows():
-            data_1 = data[row[1]['resi1']]
-            data_2 = data[row[1]['resi2']]
+            data_1 = resi_depth[row[1]['resi1']]
+            data_2 = resi_depth[row[1]['resi2']]
             if data_1 > threshold or data_2 > threshold:
                 print(f"{key:<10}", end=' ')
                 print(row[1][['resi1', 'resi2', 'total']].values, end=' ')

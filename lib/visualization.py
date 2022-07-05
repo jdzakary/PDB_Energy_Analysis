@@ -8,7 +8,16 @@ import streamlit as st
 
 
 class WebStructure:
+    """
+    A PDB structure to be used in a py3Dmol Web Viewer
+    """
     def __init__(self, file_name: str):
+        """
+        Initialize the PDB Structure
+        :param file_name:
+            A portion of the file name, such as "wild" or "variant", if the
+            full name is "pdb_wild_clean" or "pdb_variant_clean"
+        """
         self.parser = PDBParser()
         self.parser.QUIET = True
         self.pdb_file: StringIO = st.session_state[f'pdb_{file_name}_clean']
@@ -16,25 +25,53 @@ class WebStructure:
         self.text = self.__load_text()
 
     def __load_structure(self) -> Structure:
+        """
+        Parse PDB file using Biopython
+        :return:
+            Biopython structure object
+        """
         structure = self.parser.get_structure(0, self.pdb_file)
         self.pdb_file.seek(0)
         return structure
 
     def __load_text(self) -> str:
+        """
+        Read Raw text of PDB File
+        :return:
+            A String of the PDB Contents
+        """
         text = self.pdb_file.read()
         self.pdb_file.seek(0)
         return text
 
 
 class WebViewer:
+    """
+    A py3Dmol viewer object to display PDB files in the browser
+    """
     def __init__(self, width: int = 800, height: int = 500):
+        """
+        Create the viewer object
+        :param width:
+            The width of the viewer in pixels
+        :param height:
+            The height of the viewer in pixels
+        """
         self.view = py3Dmol.view(width=width, height=height)
         self.structs: Dict[str, WebStructure] = {}
         self.id_struct: Dict[str, int] = {}
         self.width = width
         self.height = height
 
-    def add_model(self, file_name: str):
+    def add_model(self, file_name: str) -> None:
+        """
+        Add a structure to the viewer
+        :param file_name:
+            A portion of the file name, such as "wild" or "variant", if the
+            full name is "pdb_wild_clean" or "pdb_variant_clean"
+        :return:
+            None
+        """
         structure = WebStructure(file_name)
         self.structs[file_name] = structure
         self.id_struct[file_name] =\
@@ -42,7 +79,17 @@ class WebViewer:
         self.view.addModel(structure.text, file_name)
         self.view.zoomTo()
 
-    def show_cartoon(self, file_name: str, color: str):
+    def show_cartoon(self, file_name: str, color: str) -> None:
+        """
+        Show the entire structure as a cartoon
+        :param file_name:
+            A portion of the file name, such as "wild" or "variant", if the
+            full name is "pdb_wild_clean" or "pdb_variant_clean"
+        :param color:
+            The color of the cartoon
+        :return:
+            None
+        """
         self.__set_style(
             {
                 'model': self.id_struct[file_name]
@@ -54,7 +101,19 @@ class WebViewer:
             }
         )
 
-    def color_cartoon(self, file_name: str, resi: int, color: str):
+    def color_cartoon(self, file_name: str, resi: int, color: str) -> None:
+        """
+        Set a particular location of the cartoon to a specific color
+        :param file_name:
+            A portion of the file name, such as "wild" or "variant", if the
+            full name is "pdb_wild_clean" or "pdb_variant_clean"
+        :param resi:
+            The residue location to be colored
+        :param color:
+            The desired color
+        :return:
+            None
+        """
         self.__set_style(
             {
                 'model': self.id_struct[file_name],
@@ -67,7 +126,16 @@ class WebViewer:
             }
         )
 
-    def __set_style(self, criteria: dict, style: dict):
+    def __set_style(self, criteria: dict, style: dict) -> None:
+        """
+        Wrapper to the javascript method
+        :param criteria:
+            Selection criteria to control how the style is applied
+        :param style:
+            The visual style that is being applied
+        :return:
+            None
+        """
         self.view.setStyle(criteria, style)
 
     def show_sc(
@@ -76,7 +144,21 @@ class WebViewer:
         resi: Iterable[int],
         color_stick: str,
         color_cartoon: str
-    ):
+    ) -> None:
+        """
+        Show the side chains of specific residues
+        :param file_name:
+            A portion of the file name, such as "wild" or "variant", if the
+            full name is "pdb_wild_clean" or "pdb_variant_clean"
+        :param resi:
+            A list of target residue positions
+        :param color_stick:
+            The color of the side chains
+        :param color_cartoon:
+            The color of the cartoon
+        :return:
+            None
+        """
         self.__set_style(
             {
                 'model': self.id_struct[file_name],
@@ -115,10 +197,27 @@ class WebViewer:
             }
         )
 
-    def set_background(self, color: str):
+    def set_background(self, color: str) -> None:
+        """
+        Sets the Background color of the viewer
+        :param color:
+            The background color
+        :return:
+            None
+        """
         self.view.setBackgroundColor(color)
 
-    def center(self, file_name: str, resi: List[int]):
+    def center(self, file_name: str, resi: List[int]) -> None:
+        """
+        Center the viewer at a particular location
+        :param file_name:
+            A portion of the file name, such as "wild" or "variant", if the
+            full name is "pdb_wild_clean" or "pdb_variant_clean"
+        :param resi:
+            The selection to be centered around
+        :return:
+            None
+        """
         self.view.center(
             {
                 'model': self.id_struct[file_name],
@@ -131,7 +230,19 @@ class WebViewer:
         file_name: str,
         resi: Iterable[int],
         color_stick: str
-    ):
+    ) -> None:
+        """
+        An unfinished attempt to show the hydrogen atoms of a side chain
+        :param file_name:
+            A portion of the file name, such as "wild" or "variant", if the
+            full name is "pdb_wild_clean" or "pdb_variant_clean"
+        :param resi:
+            The residue locations to show hydrogen atoms
+        :param color_stick:
+            The color of the hydrogen atom sticks
+        :return:
+            None
+        """
         self.__set_style(
             {
                 'model': self.id_struct[file_name],
@@ -145,7 +256,17 @@ class WebViewer:
             }
         )
 
-    def label_resi(self, file_name: str, resi: List[int]):
+    def label_resi(self, file_name: str, resi: List[int]) -> None:
+        """
+        Show the labels of a residue
+        :param file_name:
+            A portion of the file name, such as "wild" or "variant", if the
+            full name is "pdb_wild_clean" or "pdb_variant_clean"
+        :param resi:
+            The residues to be labeled
+        :return:
+            None
+        """
         self.view.addResLabels(
             {
                 'model': self.id_struct[file_name],
@@ -158,5 +279,11 @@ class WebViewer:
             }
         )
 
-    def show(self):
+    def show(self) -> None:
+        """
+        Use the Streamlit showmol function to embed the py3Dmol viewer object
+        in the streamlit body
+        :return:
+            None
+        """
         showmol(self.view, width=self.width, height=self.height)

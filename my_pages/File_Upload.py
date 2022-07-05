@@ -30,16 +30,34 @@ files = {
 KEY = 1
 
 
-def new_files():
+def new_files() -> None:
+    """
+    A streamlit callback to refresh file status when new files are uploaded
+    :return:
+    """
     if 'cleaned' in st.session_state.keys():
         st.session_state['cleaned'] = False
 
 
 def file_uploader(key: str, value: dict) -> None:
+    """
+    Create the file uploader widget to accept uploaded PDB files
+    :param key:
+        The file name that will be stored in session state
+    :param value:
+        A dictionary of arguments for the streamlit widget
+    :return:
+    """
     st.session_state[key] = st.file_uploader(**value, on_change=new_files)
 
 
 def renumber_pdb(file_name: str) -> None:
+    """
+    Renumber a PDB file so that the first residue is at position 1
+    :param file_name:
+        The name of the PDB file as stored in streamlit session state
+    :return:
+    """
     pdb_file = st.session_state[file_name]
     temp_file = StringIO()
     raw = pdb_file.read()
@@ -74,6 +92,13 @@ def renumber_pdb(file_name: str) -> None:
 
 
 def fasta(file_name: str) -> List[str]:
+    """
+    Generate the FASTA sequence of a PDB File
+    :param file_name:
+        The name of the PDB file as stored in streamlit session state
+    :return:
+        The FASTA sequence as a list of strings
+    """
     parser = PDBParser()
     parser.QUIET = True
     pdb_file = st.session_state[file_name]
@@ -83,6 +108,11 @@ def fasta(file_name: str) -> List[str]:
 
 
 def mutations() -> pd.DataFrame:
+    """
+    Create the mutations dataframe using files stored in session state
+    :return:
+        The mutations dataframe
+    """
     variant = fasta('pdb_variant_clean')
     wild = fasta('pdb_wild_clean')
     assert len(variant) == len(wild)
@@ -100,6 +130,11 @@ def mutations() -> pd.DataFrame:
 
 
 def adjust_pdb(x: str) -> str:
+    """
+    Internal format adjuster for cleaning PDB files
+    :param x:
+    :return:
+    """
     initial = len(x)
     if initial == 1:
         x += '  '
@@ -111,6 +146,11 @@ def adjust_pdb(x: str) -> str:
 
 
 def find_start(data: str) -> int:
+    """
+    Internal format adjuster for cleaning PDB files
+    :param data:
+    :return:
+    """
     start = data.find(re.findall(r'\w\w\w \w', data)[0]) + 5
     number = ''
     final = False
@@ -124,6 +164,10 @@ def find_start(data: str) -> int:
 
 
 def clean_pdb() -> None:
+    """
+    Clean the PDB files
+    :return:
+    """
     for i in ['pdb_wild', 'pdb_variant']:
         if st.session_state[i] is not None:
             renumber_pdb(i)
@@ -137,6 +181,10 @@ def clean_pdb() -> None:
 
 
 def find_mutations() -> None:
+    """
+    Identify the mutations between the wild-type and variant structures
+    :return:
+    """
     clean = ['pdb_wild_clean', 'pdb_variant_clean']
     if any([x not in st.session_state.keys() for x in clean]):
         return
@@ -145,11 +193,24 @@ def find_mutations() -> None:
     st.session_state['mut_calc'] = True
 
 
-def re_upload(key: str):
+def re_upload(key: str) -> None:
+    """
+    Mark a PDB file for re-upload
+    :param key:
+        The name of the file as stored in streamlit session state
+    :return:
+    """
     st.session_state[key] = None
 
 
 def calculate_depth(file_name: str) -> None:
+    """
+    Execute the depth calculations using biopython
+    :param file_name:
+            A portion of the file name, such as "wild" or "variant", if the
+            full name is "pdb_wild_clean" or "pdb_variant_clean"
+    :return:
+    """
     parser = PDBParser()
     parser.QUIET = True
     pdb_file = st.session_state[f'pdb_{file_name}_clean']
@@ -165,6 +226,13 @@ def calculate_depth(file_name: str) -> None:
 
 
 def calculate_energy(file_type: str) -> None:
+    """
+    Execute the Rosetta Energy Breakdown protocol
+    :param file_type:
+            A portion of the file name, such as "wild" or "variant", if the
+            full name is "pdb_wild_clean" or "pdb_variant_clean"
+    :return:
+    """
     assert f'pdb_{file_type}_clean' in st.session_state.keys()
     pdb_file: StringIO = st.session_state[f'pdb_{file_type}_clean']
     with open(f'lib/storage/{file_type}.pdb', 'w') as file:
@@ -187,7 +255,12 @@ def calculate_energy(file_type: str) -> None:
     os.remove(f'lib/storage/energy_{file_type}.out')
 
 
-def find_depth():
+def find_depth() -> None:
+    """
+    Call the calculate_depth function in a separate thread, and monitor
+    this thread using add_script_run_ctx
+    :return:
+    """
     for i in ['wild', 'variant']:
         if f'pdb_{i}_clean' in st.session_state.keys():
             st.session_state['depth'] = True
@@ -196,7 +269,12 @@ def find_depth():
             task.start()
 
 
-def find_energy():
+def find_energy() -> None:
+    """
+    Call the calculate_energy function in a separate thread, and monitor
+    this thread using add_script_run_ctx
+    :return:
+    """
     for i in ['wild', 'variant']:
         if f'pdb_{i}_clean' in st.session_state.keys():
             st.session_state['breakdown'] = True
@@ -205,7 +283,11 @@ def find_energy():
             task.start()
 
 
-def main():
+def main() -> None:
+    """
+    Creates the File Upload Page
+    :return:
+    """
     left, center, right = st.columns([1, 2, 1])
     global KEY
     with center:

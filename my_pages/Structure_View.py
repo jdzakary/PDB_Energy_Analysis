@@ -4,6 +4,11 @@ from lib.visualization import WebViewer
 
 
 def parse_resi(user_input: str) -> None:
+    """
+    Read the residue selection string
+    :param user_input:
+    :return:
+    """
     state: dict = st.session_state['struct']
     try:
         state['resi'] = [int(x) for x in user_input.split(',')]
@@ -12,6 +17,10 @@ def parse_resi(user_input: str) -> None:
 
 
 def create_viewer() -> None:
+    """
+    Create the PDB structure viewer
+    :return:
+    """
     state = st.session_state['struct']
     viewer = WebViewer()
     for i in ['wild', 'variant']:
@@ -26,6 +35,10 @@ def create_viewer() -> None:
 
 
 def color_select() -> None:
+    """
+    Create color pickers for changing colors
+    :return:
+    """
     state: dict = st.session_state['struct']
     # Background Color
     if 'background' not in state.keys():
@@ -53,6 +66,10 @@ def color_select() -> None:
 
 
 def tools() -> None:
+    """
+    Create toolbar for selecting residues
+    :return:
+    """
     state: dict = st.session_state['struct']
     # Residue Selection
     if 'resi' not in state.keys():
@@ -65,6 +82,10 @@ def tools() -> None:
 
 
 def check_files() -> bool:
+    """
+    Check that necessary files exist in session state
+    :return:
+    """
     constraints = [
         'pdb_wild_clean' in st.session_state.keys(),
         'pdb_variant_clean' in st.session_state.keys()
@@ -73,6 +94,10 @@ def check_files() -> bool:
 
 
 def main():
+    """
+    Create the Structure View Main Page
+    :return:
+    """
     # Create Session State
     if 'struct' not in st.session_state.keys():
         st.session_state['struct'] = {}

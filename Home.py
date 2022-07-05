@@ -11,17 +11,29 @@ sys.path.append(os.path.dirname(__file__))
 
 
 def clear_session() -> None:
+    """
+    Clear the Streamlit Session State
+    :return: None
+    """
     for key in st.session_state.keys():
         del st.session_state[key]
 
 
 @st.cache
 def load_logo() -> Image:
+    """
+    Load the Lab Logo to Display in the Sidebar
+    :return: Image Object
+    """
     logo = Image.open('images/lab_logo.png')
     return logo
 
 
 def home() -> None:
+    """
+    Creates the Homepage Screen
+    :return: None
+    """
     left, center, right = st.columns([1, 2, 1])
     with center:
         st.title('Energetic Analysis Tools')
@@ -38,6 +50,18 @@ def file_status(
     success: str,
     warning: str
 ) -> None:
+    """
+    Creates a file status icon in the sidebar
+    :param name:
+        Name of the file stored in streamlit session state
+    :param error:
+        Message to display if file is not yet generated
+    :param success:
+        Message to display if file is up-to-date
+    :param warning:
+        Message to display if file is outdated
+    :return: None
+    """
     if name not in st.session_state.keys():
         st.error(error)
     elif st.session_state[name]:
@@ -57,7 +81,11 @@ pages = {
 }
 
 
-def main():
+def main() -> None:
+    """
+    Application Entry Point
+    :returns: None
+    """
     st.set_page_config(
         page_title='Energy Tools',
         page_icon='images/lab_icon.png',

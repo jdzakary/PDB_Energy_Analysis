@@ -23,12 +23,24 @@ ROWS = [
 ]
 
 
+@st.cache
 def read_js(version: int) -> str:
+    """
+    Read JS Code from file
+    :param version:
+        The serial number of the code file
+    :return:
+        The contents of the file
+    """
     with open(f'js/energy_heatmap_{version}.js', 'r') as file:
         return file.read()
 
 
 def check_files() -> bool:
+    """
+    Check to see if necessary files are in session state
+    :return:
+    """
     constraints = [
         'energy_wild' in st.session_state.keys(),
         'energy_variant' in st.session_state.keys()
@@ -42,6 +54,14 @@ def cool_stuff(
     column_2: str,
     value: str
 ) -> pd.DataFrame:
+    """
+    Experiment with pd.melt
+    :param data:
+    :param column_1:
+    :param column_2:
+    :param value:
+    :return:
+    """
     pivot = pd.pivot_table(data, value, column_1, column_2, np.sum)
     pivot.fillna(value=0, inplace=True)
     pivot.reset_index(level=0, inplace=True)
@@ -49,6 +69,11 @@ def cool_stuff(
 
 
 def fill_holes() -> Dict[str, pd.DataFrame]:
+    """
+    Ensure that the wild-type and variant interaction energy dataframes
+    are of the same length. Important for JS Code when syncing selections
+    :return:
+    """
     wild = st.session_state['energy_wild']
     variant = st.session_state['energy_variant']
     cw = pd.DataFrame(wild[ROWS + ['resi1', 'resi2']], copy=True)
@@ -82,6 +107,16 @@ def create_heatmap(
     data: pd.DataFrame,
     extrema: int = 5
 ) -> dict:
+    """
+    Create the Bokeh Components
+    :param file_name:
+        The partial file name
+    :param data:
+        The residue energy breakdown dataframe
+    :param extrema:
+        The extrema to use for the color bar, which is centered at 0
+    :return:
+    """
     # Setup Bokeh Plot
     reset = ResetTool()
     wheel_zoom = WheelZoomTool()
@@ -137,6 +172,10 @@ def create_heatmap(
 
 
 def plot_side() -> None:
+    """
+    Creates side by side heatmaps with linked axes for wild-type and variant
+    :return:
+    """
     # Create Heatmaps
     df = fill_holes()
     wild = create_heatmap('wild', df['wild'])
@@ -213,6 +252,11 @@ def plot_side() -> None:
 
 
 def plot_difference() -> None:
+    """
+    Create a heatmap showing the difference in interaction energy from
+    wild-type to variant
+    :return:
+    """
     # Create Data and Heatmaps
     df = fill_holes()
     data = df['variant'] - df['wild']
@@ -294,6 +338,10 @@ def plot_difference() -> None:
 
 
 def select_mode() -> str:
+    """
+    User selection of heatmap display mode
+    :return:
+    """
     state: dict = st.session_state['energy_heatmap']
     if 'mode' not in state.keys():
         state['mode'] = 0
@@ -312,6 +360,16 @@ def resi_energy_map(
     min_value: float,
     max_value: float
 ) -> Dict[int, str]:
+    """
+    Create a colormap for the residues of the 3D structure based on their
+    change in interaction energy from wild-type to variant
+    :param wild:
+    :param variant:
+    :param colormap:
+    :param min_value:
+    :param max_value:
+    :return:
+    """
     resi_max = max(
         wild['resi1'].values.tolist() + wild['resi2'].values.tolist()
     )
@@ -337,6 +395,11 @@ def resi_energy_map(
 
 
 def view_difference() -> None:
+    """
+    Create a 3D WebViewer to identify where energy changes occur in the
+    conformation
+    :return:
+    """
     st.header('3D Structure Heatmap')
     viewer = WebViewer()
     viewer.add_model('wild')
@@ -354,6 +417,10 @@ def view_difference() -> None:
 
 
 def main():
+    """
+    Create the Energy Heatmap Main Page
+    :return:
+    """
     if 'energy_heatmap' not in st.session_state.keys():
         st.session_state['energy_heatmap'] = {}
     st.title('Energy Heatmap')
