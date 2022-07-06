@@ -9,6 +9,12 @@ from bokeh.models.tools import (
 from bokeh.layouts import gridplot
 from bokeh.models.widgets import Slider, CheckboxGroup, TextInput
 
+if 'Residue Depth' in st.session_state.keys():
+    STATE: dict = st.session_state['Residue Depth']
+else:
+    st.session_state['Residue Depth'] = {}
+    STATE: dict = st.session_state['Residue Depth']
+
 
 def check_files() -> bool:
     """
@@ -16,10 +22,10 @@ def check_files() -> bool:
     :return:
     """
     constraints = [
-        'depth_wild' in st.session_state.keys(),
-        'energy_wild' in st.session_state.keys(),
-        'depth_variant' in st.session_state.keys(),
-        'energy_variant' in st.session_state.keys()
+        'depth_wild' in st.session_state['File Upload'].keys(),
+        'energy_wild' in st.session_state['File Upload'].keys(),
+        'depth_variant' in st.session_state['File Upload'].keys(),
+        'energy_variant' in st.session_state['File Upload'].keys()
     ]
     return all(constraints)
 
@@ -30,9 +36,9 @@ def changes() -> Dict[int, int]:
     worse energy, or not a mutation.
     :return:
     """
-    wild: pd.DataFrame = st.session_state['energy_wild']
-    variant: pd.DataFrame = st.session_state['energy_variant']
-    mutations: pd.DataFrame = st.session_state['mutations']
+    wild: pd.DataFrame = st.session_state['File Upload']['energy_wild']
+    variant: pd.DataFrame = st.session_state['File Upload']['energy_variant']
+    mutations: pd.DataFrame = st.session_state['File Upload']['mutations']
     resi = wild['resi1'].values.tolist() + wild['resi2'].values.tolist()
     mut_idx = list(mutations.index)
     results = {}
@@ -126,8 +132,10 @@ def create_plot(file_name: str) -> dict:
     :return:
     """
     # Fetch Data from Streamlit Session State
-    inter: pd.DataFrame = st.session_state[f'energy_{file_name}']
-    depth: Dict[int: float] = st.session_state[f'depth_{file_name}']
+    inter: pd.DataFrame =\
+        st.session_state['File Upload'][f'energy_{file_name}']
+    depth: Dict[int: float] =\
+        st.session_state['File Upload'][f'depth_{file_name}']
     mut_map = changes()
     resi = inter['resi1'].values.tolist() + inter['resi2'].values.tolist()
     assert max(resi) == max(depth.keys())

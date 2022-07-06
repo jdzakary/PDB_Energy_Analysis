@@ -2,6 +2,12 @@ import streamlit as st
 from utility import load_text
 from lib.visualization import WebViewer
 
+if 'Structure View' in st.session_state.keys():
+    STATE: dict = st.session_state['Structure View']
+else:
+    st.session_state['Structure View'] = {}
+    STATE: dict = st.session_state['Structure View']
+
 
 def parse_resi(user_input: str) -> None:
     """
@@ -9,9 +15,8 @@ def parse_resi(user_input: str) -> None:
     :param user_input:
     :return:
     """
-    state: dict = st.session_state['struct']
     try:
-        state['resi'] = [int(x) for x in user_input.split(',')]
+        STATE['resi'] = [int(x) for x in user_input.split(',')]
     except ValueError:
         st.error('Invalid Residue String')
 
@@ -21,16 +26,15 @@ def create_viewer() -> None:
     Create the PDB structure viewer
     :return:
     """
-    state = st.session_state['struct']
     viewer = WebViewer()
     for i in ['wild', 'variant']:
         viewer.add_model(i)
-        viewer.show_cartoon(i, state['cartoon'])
+        viewer.show_cartoon(i, STATE['cartoon'])
         viewer.show_sc(
-            i, state['resi'], state[f'{i}_color'], state['cartoon']
+            i, STATE['resi'], STATE[f'{i}_color'], STATE['cartoon']
         )
-    viewer.set_background(state['background'])
-    viewer.center('wild', state['resi'])
+    viewer.set_background(STATE['background'])
+    viewer.center('wild', STATE['resi'])
     viewer.show()
 
 
@@ -39,30 +43,29 @@ def color_select() -> None:
     Create color pickers for changing colors
     :return:
     """
-    state: dict = st.session_state['struct']
     # Background Color
-    if 'background' not in state.keys():
-        state['background'] = '#E2DFDF'
-    color = st.color_picker('Background', state['background'])
-    state['background'] = color
+    if 'background' not in STATE.keys():
+        STATE['background'] = '#E2DFDF'
+    color = st.color_picker('Background', STATE['background'])
+    STATE['background'] = color
 
     # Cartoon Color
-    if 'cartoon' not in state.keys():
-        state['cartoon'] = '#858282'
-    color = st.color_picker('Cartoon', state['cartoon'])
-    state['cartoon'] = color
+    if 'cartoon' not in STATE.keys():
+        STATE['cartoon'] = '#858282'
+    color = st.color_picker('Cartoon', STATE['cartoon'])
+    STATE['cartoon'] = color
 
     # Wild Color
-    if 'wild_color' not in state.keys():
-        state['wild_color'] = '#04EEF3'
-    color = st.color_picker('Wild Color', state['wild_color'])
-    state['wild_color'] = color
+    if 'wild_color' not in STATE.keys():
+        STATE['wild_color'] = '#04EEF3'
+    color = st.color_picker('Wild Color', STATE['wild_color'])
+    STATE['wild_color'] = color
 
     # Variant Color
-    if 'variant_color' not in state.keys():
-        state['variant_color'] = '#0FA81B'
-    color = st.color_picker('Variant Color', state['variant_color'])
-    state['variant_color'] = color
+    if 'variant_color' not in STATE.keys():
+        STATE['variant_color'] = '#0FA81B'
+    color = st.color_picker('Variant Color', STATE['variant_color'])
+    STATE['variant_color'] = color
 
 
 def tools() -> None:
@@ -70,13 +73,12 @@ def tools() -> None:
     Create toolbar for selecting residues
     :return:
     """
-    state: dict = st.session_state['struct']
     # Residue Selection
-    if 'resi' not in state.keys():
-        state['resi'] = [1, 2]
+    if 'resi' not in STATE.keys():
+        STATE['resi'] = [1, 2]
     resi = st.text_input(
         label='Show Residue Side Chains:',
-        value=','.join([str(x) for x in state['resi']])
+        value=','.join([str(x) for x in STATE['resi']])
     )
     parse_resi(resi)
 
@@ -87,8 +89,8 @@ def check_files() -> bool:
     :return:
     """
     constraints = [
-        'pdb_wild_clean' in st.session_state.keys(),
-        'pdb_variant_clean' in st.session_state.keys()
+        'pdb_wild_clean' in st.session_state['File Upload'].keys(),
+        'pdb_variant_clean' in st.session_state['File Upload'].keys()
     ]
     return all(constraints)
 
@@ -98,10 +100,6 @@ def main():
     Create the Structure View Main Page
     :return:
     """
-    # Create Session State
-    if 'struct' not in st.session_state.keys():
-        st.session_state['struct'] = {}
-
     st.title('Structure View')
     st.info(load_text('structure_view', 'align_warning'))
     if check_files():

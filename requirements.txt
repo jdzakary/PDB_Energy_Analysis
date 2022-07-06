@@ -1,6 +1,3 @@
-# Obviously this is not the only requirement. This file exists because
-# streamlit cloud has difficulty detecting the biopython dependancy.
-# All other dependencies are automatically detected and downloaded accordingly.
 biopython==1.79
 pandas==1.4.2
 streamlit==1.10.0
@@ -12,3 +9,4 @@ matplotlib==3.5.1
 colorcet==3.0.0
 py3dmol==1.8.0
 stmol==0.0.7
+streamlit-aggrid==0.2.3.post2
