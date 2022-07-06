@@ -127,7 +127,7 @@ def create_source_variant(
 def create_plot(file_name: str) -> dict:
     """
     Create Bokeh Scatter plot components and tables to be assembled
-    in the plot master function
+    in the plot_master function
     :param file_name:
     :return:
     """
@@ -181,11 +181,11 @@ def create_plot(file_name: str) -> dict:
     )
 
     # Setup Bokeh Table
-    source_copy = ColumnDataSource(
+    source_table = ColumnDataSource(
         data=dict(resi1=[], resi2=[], total=[])
     )
     table = DataTable(
-        source=source_copy,
+        source=source_table,
         columns=[
             TableColumn(field='resi1', title='Position 1'),
             TableColumn(field='resi2', title='Position 2'),
@@ -202,7 +202,7 @@ def create_plot(file_name: str) -> dict:
         'plot': plot,
         'source': source,
         'table': table,
-        'source_copy': source_copy,
+        'source_table': source_table,
         'entries': entries,
         'circles': circles
     }
@@ -262,16 +262,16 @@ def plot_master() -> None:
         wild=dict(
             source=wild['source'],
             s_e=wild['entries'],
-            sc=wild['source_copy'],
-            oc=variant['source_copy'],
+            sc=wild['source_table'],
+            oc=variant['source_table'],
             o_e=variant['entries'],
             o_s=variant['source']
         ),
         variant=dict(
             source=variant['source'],
             s_e=variant['entries'],
-            sc=variant['source_copy'],
-            oc=wild['source_copy'],
+            sc=variant['source_table'],
+            oc=wild['source_table'],
             o_e=wild['entries'],
             o_s=wild['source']
         )
@@ -300,22 +300,22 @@ def plot_master() -> None:
     )
 
     # JS Code Linking Table Selection
-    wild['source_copy'].selected.js_on_change(
+    wild['source_table'].selected.js_on_change(
         'indices',
         CustomJS(
             args=dict(
-                source=wild['source_copy'],
-                other=variant['source_copy']
+                source=wild['source_table'],
+                other=variant['source_table']
             ),
             code=read_js(4)
         )
     )
-    variant['source_copy'].selected.js_on_change(
+    variant['source_table'].selected.js_on_change(
         'indices',
         CustomJS(
             args=dict(
-                source=variant['source_copy'],
-                other=wild['source_copy']
+                source=variant['source_table'],
+                other=wild['source_table']
             ),
             code=read_js(4)
         )

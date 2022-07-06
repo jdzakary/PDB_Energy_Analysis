@@ -365,7 +365,8 @@ def buried_hbonds(
     **kwargs
 ) -> None:
     """
-    An incomplete attempt to identify buried hydrogen bonds using residue depth
+    An incomplete attempt to identify buried and unsatisfied
+     hydrogen bonds using residue depth
     :param resi_depth:
     :param threshold:
     :param hbonds_sc_sc:
@@ -377,14 +378,22 @@ def buried_hbonds(
     :return:
     """
     frames = {
-        f'sc_sc_{"c" if unsatisfied else "e"}': hbonds_sc_sc['c' if unsatisfied else 'e'],
-        f'sc_sc_{"d" if unsatisfied else "f"}': hbonds_sc_sc['d' if unsatisfied else 'f'],
-        f'bb_sc_{"c" if unsatisfied else "e"}': hbonds_bb_sc['c' if unsatisfied else 'e'],
-        f'bb_sc_{"d" if unsatisfied else "f"}': hbonds_bb_sc['d' if unsatisfied else 'f'],
-        f'bb_bb_sr_{"c" if unsatisfied else "e"}': hbonds_bb_bb_sr['c' if unsatisfied else 'e'],
-        f'bb_bb_sr_{"d" if unsatisfied else "f"}': hbonds_bb_bb_sr['d' if unsatisfied else 'f'],
-        f'bb_bb_lr_{"c" if unsatisfied else "e"}': hbonds_bb_bb_lr['c' if unsatisfied else 'e'],
-        f'bb_bb_lr_{"d" if unsatisfied else "f"}': hbonds_bb_bb_lr['d' if unsatisfied else 'f']
+        f'sc_sc_{"c" if unsatisfied else "e"}':
+            hbonds_sc_sc['c' if unsatisfied else 'e'],
+        f'sc_sc_{"d" if unsatisfied else "f"}':
+            hbonds_sc_sc['d' if unsatisfied else 'f'],
+        f'bb_sc_{"c" if unsatisfied else "e"}':
+            hbonds_bb_sc['c' if unsatisfied else 'e'],
+        f'bb_sc_{"d" if unsatisfied else "f"}':
+            hbonds_bb_sc['d' if unsatisfied else 'f'],
+        f'bb_bb_sr_{"c" if unsatisfied else "e"}':
+            hbonds_bb_bb_sr['c' if unsatisfied else 'e'],
+        f'bb_bb_sr_{"d" if unsatisfied else "f"}':
+            hbonds_bb_bb_sr['d' if unsatisfied else 'f'],
+        f'bb_bb_lr_{"c" if unsatisfied else "e"}':
+            hbonds_bb_bb_lr['c' if unsatisfied else 'e'],
+        f'bb_bb_lr_{"d" if unsatisfied else "f"}':
+            hbonds_bb_bb_lr['d' if unsatisfied else 'f']
     }
 
     for key, df in frames.items():
