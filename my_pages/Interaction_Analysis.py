@@ -7,11 +7,7 @@ from st_aggrid import (
     AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
 )
 
-if 'Interaction Analysis' in st.session_state.keys():
-    STATE: dict = st.session_state['Interaction Analysis']
-else:
-    st.session_state['Interaction Analysis'] = {}
-    STATE: dict = st.session_state['Interaction Analysis']
+STATE: dict
 
 KEY = 1
 categories = {
@@ -137,6 +133,8 @@ def main():
     Create the Interaction Analysis Main Page
     :return:
     """
+    global STATE
+    STATE = st.session_state['Interaction Analysis']
     left, center, right = st.columns([1, 2, 1])
     with center:
         if 'complete' not in STATE.keys():

@@ -2,11 +2,7 @@ import streamlit as st
 from utility import load_text
 from lib.visualization import WebViewer
 
-if 'Structure View' in st.session_state.keys():
-    STATE: dict = st.session_state['Structure View']
-else:
-    st.session_state['Structure View'] = {}
-    STATE: dict = st.session_state['Structure View']
+STATE: dict
 
 
 def parse_resi(user_input: str) -> None:
@@ -100,6 +96,8 @@ def main():
     Create the Structure View Main Page
     :return:
     """
+    global STATE
+    STATE = st.session_state['Structure View']
     st.title('Structure View')
     st.info(load_text('structure_view', 'align_warning'))
     if check_files():
