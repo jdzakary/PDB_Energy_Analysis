@@ -1,3 +1,4 @@
+*.rb linguist-vendored=true
 lib/msms_linux/* linguist-vendored=true
 lib/rosetta_linux/* linguist-vendored=true
 PDB_Energy_Analysis/lib/msms_linux/* linguist-vendored=true
