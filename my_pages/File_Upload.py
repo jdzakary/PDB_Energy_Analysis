@@ -4,8 +4,8 @@ import re
 import streamlit as st
 import pandas as pd
 import lib.energy_breakdown as eb
-from io import StringIO
-from typing import List
+from io import StringIO, BytesIO
+from typing import List, Callable
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import ResidueDepth
 from functools import partial
@@ -229,7 +229,6 @@ def calculate_depth(file_name: str) -> None:
     )
     results = {x[1][1]: y[0] for x, y in rd.property_dict.items()}
     STATE[f'depth_{file_name}'] = results
-    print(f'Finished with {file_name}')
 
 
 def calculate_energy(file_type: str) -> None:
@@ -290,6 +289,50 @@ def find_energy() -> None:
             task.start()
 
 
+def show_action(
+    header: str,
+    text_file_name: str,
+    button_label: str,
+    callback: Callable
+) -> None:
+    st.subheader(header)
+    st.write(load_text('file_upload', text_file_name))
+    st.button(label=button_label, on_click=callback)
+
+
+actions = {
+    'Cleaning PDB Files': dict(
+        text_file_name='pdb_files',
+        button_label='Clean PDB Files',
+        callback=clean_pdb
+    ),
+    'Determining Mutations': dict(
+        text_file_name='mutations',
+        button_label='Find Mutations',
+        callback=find_mutations
+    ),
+    'Residue Depth': dict(
+        text_file_name='residue_depth',
+        button_label='Calculate Depth',
+        callback=find_depth
+    ),
+    'Rosetta Energy Breakdown Protocol': dict(
+        text_file_name='energy_files',
+        button_label='Calculate Energy',
+        callback=find_energy
+    )
+}
+
+
+def use_example(file_name: str) -> None:
+    file = BytesIO()
+    with open(f'lib/example_{file_name[4:]}.pdb', 'rb') as stream:
+        file.write(stream.read())
+    file.seek(0)
+    file.name = f'example_{file_name[4:]}.pdb'
+    STATE[file_name] = file
+
+
 def main() -> None:
     """
     Creates the File Upload Page
@@ -302,6 +345,12 @@ def main() -> None:
         for key, value in files.items():
             if key not in STATE.keys() or STATE[key] is None:
                 file_uploader(key, value)
+                st.button(
+                    label='Use Example File',
+                    key=KEY,
+                    on_click=partial(use_example, file_name=key)
+                )
+                KEY += 1
             else:
                 st.success(
                     f'{key} is uploaded --- {STATE[key].name}'
@@ -312,19 +361,5 @@ def main() -> None:
                     on_click=partial(re_upload, key=key)
                 )
                 KEY += 1
-
-        st.subheader('Cleaning PDB Files')
-        st.write(load_text('file_upload', 'pdb_files'))
-        st.button(label='Clean PDB Files', on_click=clean_pdb)
-
-        st.subheader('Determining Mutations')
-        st.write(load_text('file_upload', 'mutations'))
-        st.button(label='Find Mutations', on_click=find_mutations)
-
-        st.subheader('Residue Depth')
-        st.write(load_text('file_upload', 'residue_depth'))
-        st.button(label='Calculate Depth', on_click=find_depth)
-
-        st.subheader('Rosetta Energy Breakdown Protocol')
-        st.write(load_text('file_upload', 'energy_files'))
-        st.button(label='Calculate Energy', on_click=find_energy)
+        for key, value in actions.items():
+            show_action(key, **value)

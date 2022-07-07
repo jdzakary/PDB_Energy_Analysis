@@ -45,9 +45,9 @@ def home() -> None:
         st.title('Energetic Analysis Tools')
         st.header('Introduction')
         st.write(load_text('home', 'introduction'))
-        st.header('Reset the Application')
-        st.error('Warning! This will Clear all Data!')
-        st.button('Reset', on_click=clear_session)
+        # st.header('Reset the Application')
+        # st.error('Warning! This will Clear all Data!')
+        # st.button('Reset', on_click=clear_session)
 
 
 def file_status(
