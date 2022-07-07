@@ -14,6 +14,11 @@ from bokeh.layouts import gridplot, column
 from bokeh.models.widgets import Slider, Button
 from lib.visualization import WebViewer
 
+if 'Energy Heatmap' in st.session_state.keys():
+    STATE: dict = st.session_state['Energy Heatmap']
+else:
+    st.session_state['Energy Heatmap'] = {}
+    STATE: dict = st.session_state['Energy Heatmap']
 
 ROWS = [
     'fa_atr', 'fa_rep', 'fa_sol', 'fa_intra_rep', 'fa_intra_sol_xover4',
@@ -42,8 +47,8 @@ def check_files() -> bool:
     :return:
     """
     constraints = [
-        'energy_wild' in st.session_state.keys(),
-        'energy_variant' in st.session_state.keys()
+        'energy_wild' in st.session_state['File Upload'].keys(),
+        'energy_variant' in st.session_state['File Upload'].keys()
     ]
     return all(constraints)
 
@@ -74,8 +79,8 @@ def fill_holes() -> Dict[str, pd.DataFrame]:
     are of the same length. Important for JS Code when syncing selections
     :return:
     """
-    wild = st.session_state['energy_wild']
-    variant = st.session_state['energy_variant']
+    wild = st.session_state['File Upload']['energy_wild']
+    variant = st.session_state['File Upload']['energy_variant']
     cw = pd.DataFrame(wild[ROWS + ['resi1', 'resi2']], copy=True)
     cv = pd.DataFrame(variant[ROWS + ['resi1', 'resi2']], copy=True)
     pairs_w = cw[['resi1', 'resi2']].values.tolist()
@@ -342,9 +347,8 @@ def select_mode() -> str:
     User selection of heatmap display mode
     :return:
     """
-    state: dict = st.session_state['energy_heatmap']
-    if 'mode' not in state.keys():
-        state['mode'] = 0
+    if 'mode' not in STATE.keys():
+        STATE['mode'] = 0
     radio = st.radio(
         label='Select Mode',
         options=['Difference', 'Side-by-Side'],
@@ -405,8 +409,8 @@ def view_difference() -> None:
     viewer.add_model('wild')
     viewer.show_cartoon('wild', '#858282')
     cartoon_color = resi_energy_map(
-        st.session_state['energy_wild'],
-        st.session_state['energy_variant'],
+        st.session_state['File Upload']['energy_wild'],
+        st.session_state['File Upload']['energy_variant'],
         cc.b_linear_bmy_10_95_c78,
         -4, 4
     )
@@ -421,8 +425,6 @@ def main():
     Create the Energy Heatmap Main Page
     :return:
     """
-    if 'energy_heatmap' not in st.session_state.keys():
-        st.session_state['energy_heatmap'] = {}
     st.title('Energy Heatmap')
     if check_files():
         if select_mode() == 'Side-by-Side':

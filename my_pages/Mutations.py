@@ -4,6 +4,12 @@ from st_aggrid import (
     AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
 )
 
+if 'Mutations' in st.session_state.keys():
+    STATE: dict = st.session_state['Mutations']
+else:
+    st.session_state['Mutations'] = {}
+    STATE: dict = st.session_state['Mutations']
+
 
 def check_files() -> bool:
     """
@@ -11,7 +17,7 @@ def check_files() -> bool:
     :return:
     """
     constraints = [
-        'mutations' in st.session_state.keys()
+        'mutations' in st.session_state['File Upload'].keys()
     ]
     return all(constraints)
 
@@ -21,7 +27,7 @@ def adjust_mutations() -> pd.DataFrame:
     Adjust the mutations dataframe stored in session state
     :return:
     """
-    data: pd.DataFrame = st.session_state['mutations']
+    data: pd.DataFrame = st.session_state['File Upload']['mutations']
     new = data.reset_index(0)
     return new
 

@@ -20,7 +20,8 @@ class WebStructure:
         """
         self.parser = PDBParser()
         self.parser.QUIET = True
-        self.pdb_file: StringIO = st.session_state[f'pdb_{file_name}_clean']
+        self.pdb_file: StringIO =\
+            st.session_state['File Upload'][f'pdb_{file_name}_clean']
         self.structure = self.__load_structure()
         self.text = self.__load_text()
 

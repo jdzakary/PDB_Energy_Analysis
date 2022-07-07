@@ -9,6 +9,12 @@ from my_pages import (
 from utility import load_text
 sys.path.append(os.path.dirname(__file__))
 
+if 'Home' in st.session_state.keys():
+    STATE: dict = st.session_state['Home']
+else:
+    st.session_state['Home'] = {}
+    STATE: dict = st.session_state['Home']
+
 
 def clear_session() -> None:
     """
@@ -39,9 +45,9 @@ def home() -> None:
         st.title('Energetic Analysis Tools')
         st.header('Introduction')
         st.write(load_text('home', 'introduction'))
-        st.header('Reset the Application')
-        st.error('Warning! This will Clear all Data!')
-        st.button('Reset', on_click=clear_session)
+        # st.header('Reset the Application')
+        # st.error('Warning! This will Clear all Data!')
+        # st.button('Reset', on_click=clear_session)
 
 
 def file_status(
@@ -62,9 +68,9 @@ def file_status(
         Message to display if file is outdated
     :return: None
     """
-    if name not in st.session_state.keys():
+    if name not in st.session_state['File Upload'].keys():
         st.error(error)
-    elif st.session_state[name]:
+    elif st.session_state['File Upload'][name]:
         st.success(success)
     else:
         st.warning(warning)

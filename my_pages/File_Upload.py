@@ -4,14 +4,21 @@ import re
 import streamlit as st
 import pandas as pd
 import lib.energy_breakdown as eb
-from io import StringIO
-from typing import List
+from io import StringIO, BytesIO
+from typing import List, Callable
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import ResidueDepth
 from functools import partial
 from threading import Thread
 from streamlit.scriptrunner.script_run_context import add_script_run_ctx
 from utility import load_text
+
+if 'File Upload' in st.session_state.keys():
+    STATE: dict = st.session_state['File Upload']
+else:
+    st.session_state['File Upload'] = {}
+    STATE: dict = st.session_state['File Upload']
+
 
 with open('lib/aa_map.json', 'r') as my_file:
     aa_map = json.load(my_file)
@@ -35,8 +42,8 @@ def new_files() -> None:
     A streamlit callback to refresh file status when new files are uploaded
     :return:
     """
-    if 'cleaned' in st.session_state.keys():
-        st.session_state['cleaned'] = False
+    if 'cleaned' in STATE.keys():
+        STATE['cleaned'] = False
 
 
 def file_uploader(key: str, value: dict) -> None:
@@ -48,7 +55,7 @@ def file_uploader(key: str, value: dict) -> None:
         A dictionary of arguments for the streamlit widget
     :return:
     """
-    st.session_state[key] = st.file_uploader(**value, on_change=new_files)
+    STATE[key] = st.file_uploader(**value, on_change=new_files)
 
 
 def renumber_pdb(file_name: str) -> None:
@@ -58,7 +65,7 @@ def renumber_pdb(file_name: str) -> None:
         The name of the PDB file as stored in streamlit session state
     :return:
     """
-    pdb_file = st.session_state[file_name]
+    pdb_file = STATE[file_name]
     temp_file = StringIO()
     raw = pdb_file.read()
     text = raw.decode('utf-8').split('\n')
@@ -88,7 +95,7 @@ def renumber_pdb(file_name: str) -> None:
     result.write('\n'.join(rows))
     result.seek(0)
     pdb_file.seek(0)
-    st.session_state[f'{file_name}_clean'] = result
+    STATE[f'{file_name}_clean'] = result
 
 
 def fasta(file_name: str) -> List[str]:
@@ -101,7 +108,7 @@ def fasta(file_name: str) -> List[str]:
     """
     parser = PDBParser()
     parser.QUIET = True
-    pdb_file = st.session_state[file_name]
+    pdb_file = STATE[file_name]
     structure = parser.get_structure(0, pdb_file)
     pdb_file.seek(0)
     return [aa_map[x.resname] for x in structure.get_residues()]
@@ -169,15 +176,15 @@ def clean_pdb() -> None:
     :return:
     """
     for i in ['pdb_wild', 'pdb_variant']:
-        if st.session_state[i] is not None:
+        if STATE[i] is not None:
             renumber_pdb(i)
-    st.session_state['cleaned'] = True
-    if 'mut_calc' in st.session_state.keys():
-        st.session_state['mut_calc'] = False
-    if 'depth' in st.session_state.keys():
-        st.session_state['depth'] = False
-    if 'breakdown' in st.session_state.keys():
-        st.session_state['breakdown'] = False
+    STATE['cleaned'] = True
+    if 'mut_calc' in STATE.keys():
+        STATE['mut_calc'] = False
+    if 'depth' in STATE.keys():
+        STATE['depth'] = False
+    if 'breakdown' in STATE.keys():
+        STATE['breakdown'] = False
 
 
 def find_mutations() -> None:
@@ -186,11 +193,11 @@ def find_mutations() -> None:
     :return:
     """
     clean = ['pdb_wild_clean', 'pdb_variant_clean']
-    if any([x not in st.session_state.keys() for x in clean]):
+    if any([x not in STATE.keys() for x in clean]):
         return
     data = mutations()
-    st.session_state['mutations'] = data
-    st.session_state['mut_calc'] = True
+    STATE['mutations'] = data
+    STATE['mut_calc'] = True
 
 
 def re_upload(key: str) -> None:
@@ -200,7 +207,7 @@ def re_upload(key: str) -> None:
         The name of the file as stored in streamlit session state
     :return:
     """
-    st.session_state[key] = None
+    STATE[key] = None
 
 
 def calculate_depth(file_name: str) -> None:
@@ -213,7 +220,7 @@ def calculate_depth(file_name: str) -> None:
     """
     parser = PDBParser()
     parser.QUIET = True
-    pdb_file = st.session_state[f'pdb_{file_name}_clean']
+    pdb_file = STATE[f'pdb_{file_name}_clean']
     structure = parser.get_structure(0, pdb_file)
     pdb_file.seek(0)
     rd = ResidueDepth(
@@ -221,8 +228,7 @@ def calculate_depth(file_name: str) -> None:
         msms_exec='lib/msms_linux/msms.x86_64Linux2.2.6.1'
     )
     results = {x[1][1]: y[0] for x, y in rd.property_dict.items()}
-    st.session_state[f'depth_{file_name}'] = results
-    print(f'Finished with {file_name}')
+    STATE[f'depth_{file_name}'] = results
 
 
 def calculate_energy(file_type: str) -> None:
@@ -233,8 +239,8 @@ def calculate_energy(file_type: str) -> None:
             full name is "pdb_wild_clean" or "pdb_variant_clean"
     :return:
     """
-    assert f'pdb_{file_type}_clean' in st.session_state.keys()
-    pdb_file: StringIO = st.session_state[f'pdb_{file_type}_clean']
+    assert f'pdb_{file_type}_clean' in STATE.keys()
+    pdb_file: StringIO = STATE[f'pdb_{file_type}_clean']
     with open(f'lib/storage/{file_type}.pdb', 'w') as file:
         file.write(pdb_file.read())
     pdb_file.seek(0)
@@ -250,7 +256,7 @@ def calculate_energy(file_type: str) -> None:
     energy = pd.read_csv(f'lib/storage/energy_{file_type}.csv')
     energy.drop(energy[energy['resi2'] == '--'].index, inplace=True)
     energy['resi2'] = energy['resi2'].astype(int)
-    st.session_state[f'energy_{file_type}'] = energy
+    STATE[f'energy_{file_type}'] = energy
     os.remove(f'lib/storage/energy_{file_type}.csv')
     os.remove(f'lib/storage/energy_{file_type}.out')
 
@@ -262,8 +268,8 @@ def find_depth() -> None:
     :return:
     """
     for i in ['wild', 'variant']:
-        if f'pdb_{i}_clean' in st.session_state.keys():
-            st.session_state['depth'] = True
+        if f'pdb_{i}_clean' in STATE.keys():
+            STATE['depth'] = True
             task = Thread(target=partial(calculate_depth, file_name=i))
             add_script_run_ctx(task)
             task.start()
@@ -276,11 +282,55 @@ def find_energy() -> None:
     :return:
     """
     for i in ['wild', 'variant']:
-        if f'pdb_{i}_clean' in st.session_state.keys():
-            st.session_state['breakdown'] = True
+        if f'pdb_{i}_clean' in STATE.keys():
+            STATE['breakdown'] = True
             task = Thread(target=partial(calculate_energy, i))
             add_script_run_ctx(task)
             task.start()
+
+
+def show_action(
+    header: str,
+    text_file_name: str,
+    button_label: str,
+    callback: Callable
+) -> None:
+    st.subheader(header)
+    st.write(load_text('file_upload', text_file_name))
+    st.button(label=button_label, on_click=callback)
+
+
+actions = {
+    'Cleaning PDB Files': dict(
+        text_file_name='pdb_files',
+        button_label='Clean PDB Files',
+        callback=clean_pdb
+    ),
+    'Determining Mutations': dict(
+        text_file_name='mutations',
+        button_label='Find Mutations',
+        callback=find_mutations
+    ),
+    'Residue Depth': dict(
+        text_file_name='residue_depth',
+        button_label='Calculate Depth',
+        callback=find_depth
+    ),
+    'Rosetta Energy Breakdown Protocol': dict(
+        text_file_name='energy_files',
+        button_label='Calculate Energy',
+        callback=find_energy
+    )
+}
+
+
+def use_example(file_name: str) -> None:
+    file = BytesIO()
+    with open(f'lib/example_{file_name[4:]}.pdb', 'rb') as stream:
+        file.write(stream.read())
+    file.seek(0)
+    file.name = f'example_{file_name[4:]}.pdb'
+    STATE[file_name] = file
 
 
 def main() -> None:
@@ -293,11 +343,17 @@ def main() -> None:
     with center:
         st.title('Upload Necessary Data')
         for key, value in files.items():
-            if key not in st.session_state.keys() or st.session_state[key] is None:
+            if key not in STATE.keys() or STATE[key] is None:
                 file_uploader(key, value)
+                st.button(
+                    label='Use Example File',
+                    key=KEY,
+                    on_click=partial(use_example, file_name=key)
+                )
+                KEY += 1
             else:
                 st.success(
-                    f'{key} is uploaded --- {st.session_state[key].name}'
+                    f'{key} is uploaded --- {STATE[key].name}'
                 )
                 st.button(
                     label='Re-upload?',
@@ -305,19 +361,5 @@ def main() -> None:
                     on_click=partial(re_upload, key=key)
                 )
                 KEY += 1
-
-        st.subheader('Cleaning PDB Files')
-        st.write(load_text('file_upload', 'pdb_files'))
-        st.button(label='Clean PDB Files', on_click=clean_pdb)
-
-        st.subheader('Determining Mutations')
-        st.write(load_text('file_upload', 'mutations'))
-        st.button(label='Find Mutations', on_click=find_mutations)
-
-        st.subheader('Residue Depth')
-        st.write(load_text('file_upload', 'residue_depth'))
-        st.button(label='Calculate Depth', on_click=find_depth)
-
-        st.subheader('Rosetta Energy Breakdown Protocol')
-        st.write(load_text('file_upload', 'energy_files'))
-        st.button(label='Calculate Energy', on_click=find_energy)
+        for key, value in actions.items():
+            show_action(key, **value)
