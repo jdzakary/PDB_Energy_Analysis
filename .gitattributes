@@ -2,3 +2,4 @@ lib/msms_linux/* linguist-vendored=true
 lib/rosetta_linux/* linguist-vendored=true
 PDB_Energy_Analysis/lib/msms_linux/* linguist-vendored=true
 PDB_Energy_Analysis/lib/rosetta_linux/* linguist-vendored=true
+lib/rosetta_linux/database/scoring/score_functions/rama/Rama_smooth_dyn.dat_ss_6.4 linguist-vendored=true
