@@ -14,11 +14,7 @@ from bokeh.layouts import gridplot, column
 from bokeh.models.widgets import Slider, Button
 from lib.visualization import WebViewer
 
-if 'Energy Heatmap' in st.session_state.keys():
-    STATE: dict = st.session_state['Energy Heatmap']
-else:
-    st.session_state['Energy Heatmap'] = {}
-    STATE: dict = st.session_state['Energy Heatmap']
+STATE: dict
 
 ROWS = [
     'fa_atr', 'fa_rep', 'fa_sol', 'fa_intra_rep', 'fa_intra_sol_xover4',
@@ -425,6 +421,8 @@ def main():
     Create the Energy Heatmap Main Page
     :return:
     """
+    global STATE
+    STATE = st.session_state['Energy Heatmap']
     st.title('Energy Heatmap')
     if check_files():
         if select_mode() == 'Side-by-Side':

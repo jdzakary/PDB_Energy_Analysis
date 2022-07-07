@@ -9,11 +9,7 @@ from my_pages import (
 from utility import load_text
 sys.path.append(os.path.dirname(__file__))
 
-if 'Home' in st.session_state.keys():
-    STATE: dict = st.session_state['Home']
-else:
-    st.session_state['Home'] = {}
-    STATE: dict = st.session_state['Home']
+STATE: dict
 
 
 def clear_session() -> None:
@@ -48,6 +44,7 @@ def home() -> None:
         # st.header('Reset the Application')
         # st.error('Warning! This will Clear all Data!')
         # st.button('Reset', on_click=clear_session)
+        # st.write(st.session_state)
 
 
 def file_status(
@@ -87,6 +84,12 @@ pages = {
 }
 
 
+def ensure_state() -> None:
+    for i in pages.keys():
+        if i not in st.session_state.keys():
+            st.session_state[i] = {}
+
+
 def main() -> None:
     """
     Application Entry Point
@@ -97,6 +100,7 @@ def main() -> None:
         page_icon='images/lab_icon.png',
         layout='wide'
     )
+    ensure_state()
     with st.sidebar:
         st.markdown(
             body="<h1 style='text-align: center;'>Kuenze Lab</h1>",

@@ -13,11 +13,7 @@ from threading import Thread
 from streamlit.scriptrunner.script_run_context import add_script_run_ctx
 from utility import load_text
 
-if 'File Upload' in st.session_state.keys():
-    STATE: dict = st.session_state['File Upload']
-else:
-    st.session_state['File Upload'] = {}
-    STATE: dict = st.session_state['File Upload']
+STATE: dict
 
 
 with open('lib/aa_map.json', 'r') as my_file:
@@ -338,6 +334,8 @@ def main() -> None:
     Creates the File Upload Page
     :return:
     """
+    global STATE
+    STATE = st.session_state['File Upload']
     left, center, right = st.columns([1, 2, 1])
     global KEY
     with center:

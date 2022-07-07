@@ -4,11 +4,7 @@ from st_aggrid import (
     AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
 )
 
-if 'Mutations' in st.session_state.keys():
-    STATE: dict = st.session_state['Mutations']
-else:
-    st.session_state['Mutations'] = {}
-    STATE: dict = st.session_state['Mutations']
+STATE: dict
 
 
 def check_files() -> bool:
@@ -74,6 +70,8 @@ def main():
     Create the Mutations Main Page
     :return:
     """
+    global STATE
+    STATE = st.session_state['Mutations']
     columns = st.columns([1, 3, 1])
     with columns[1]:
         st.title('Check Mutations')

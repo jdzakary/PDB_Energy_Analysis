@@ -9,11 +9,7 @@ from bokeh.models.tools import (
 from bokeh.layouts import gridplot
 from bokeh.models.widgets import Slider, CheckboxGroup, TextInput
 
-if 'Residue Depth' in st.session_state.keys():
-    STATE: dict = st.session_state['Residue Depth']
-else:
-    st.session_state['Residue Depth'] = {}
-    STATE: dict = st.session_state['Residue Depth']
+STATE: dict
 
 
 def check_files() -> bool:
@@ -338,6 +334,8 @@ def main():
     Create the Residue Depth Main Page
     :return:
     """
+    global STATE
+    STATE = st.session_state['Residue Depth']
     st.title('Residue Depth in the Protein')
     if check_files():
         plot_master()
