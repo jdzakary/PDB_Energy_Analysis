@@ -1,3 +1,0 @@
-metapatches/connect.txt
-metapatches/metal_connect.txt
-metapatches/pruneH.txt

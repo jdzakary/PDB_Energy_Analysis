@@ -1,2 +1,0 @@
-# This file helps to merge PDB residues that Rosetta prefers to represent with patches.
-# Its three fields are tab-separated. Try to keep this up to date with patches!
