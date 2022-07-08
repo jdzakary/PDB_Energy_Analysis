@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import inspect
 import streamlit as st
 import pandas as pd
 import lib.energy_breakdown as eb
@@ -225,6 +226,7 @@ def calculate_depth(file_name: str) -> None:
     )
     results = {x[1][1]: y[0] for x, y in rd.property_dict.items()}
     STATE[f'depth_{file_name}'] = results
+    STATE['depth'] = True
 
 
 def calculate_energy(file_type: str) -> None:
@@ -261,11 +263,12 @@ def calculate_energy(file_type: str) -> None:
     energy.drop(energy[energy['resi2'] == '--'].index, inplace=True)
     energy['resi2'] = energy['resi2'].astype(int)
     STATE[f'energy_{file_type}'] = energy
+    STATE['breakdown'] = True
     os.remove(f'lib/storage/energy_{file_type}.csv')
     os.remove(f'lib/storage/energy_{file_type}.out')
 
 
-def find_depth() -> None:
+def find_depth(container) -> None:
     """
     Call the calculate_depth function in a separate thread, and monitor
     this thread using add_script_run_ctx
@@ -273,13 +276,15 @@ def find_depth() -> None:
     """
     for i in ['wild', 'variant']:
         if f'pdb_{i}_clean' in STATE.keys():
-            STATE['depth'] = True
             task = Thread(target=partial(calculate_depth, file_name=i))
             add_script_run_ctx(task)
             task.start()
+            container.warning(
+                f'Calculations for {i} initiated in separate thread'
+            )
 
 
-def find_energy() -> None:
+def find_energy(container) -> None:
     """
     Call the calculate_energy function in a separate thread, and monitor
     this thread using add_script_run_ctx
@@ -287,13 +292,19 @@ def find_energy() -> None:
     """
     for i in ['wild', 'variant']:
         if f'pdb_{i}_clean' in STATE.keys():
-            STATE['breakdown'] = True
             task = Thread(target=partial(calculate_energy, i))
             add_script_run_ctx(task)
             task.start()
+            container.warning(
+                f'Calculations for {i} initiated in separate thread'
+            )
 
 
 def check_rosetta() -> bool:
+    """
+    Check if the application has a valid Rosetta Executable to use
+    :return:
+    """
     if st.session_state['Home']['rosetta_local']:
         return True
     return st.session_state['Home']['rosetta_installed']
@@ -305,12 +316,29 @@ def show_action(
     button_label: str,
     callback: Callable
 ) -> None:
+    """
+    Display an action that can be performed on uploaded file data
+    :param header:
+        The sub-header to name this section
+    :param text_file_name:
+        The text file identifier on disk to load
+    :param button_label:
+        The label of the button that will execute the action
+    :param callback:
+        The action to be executed when the button is pressed
+    :return:
+    """
     st.subheader(header)
     st.write(load_text('file_upload', text_file_name))
     if text_file_name == 'energy_files' and not check_rosetta():
         st.error('No Rosetta Executable Available!')
         return
-    st.button(label=button_label, on_click=callback)
+    status = st.container()
+    status.write('')
+    if len(inspect.signature(callback).parameters.keys()):
+        st.button(label=button_label, on_click=partial(callback, status))
+    else:
+        st.button(label=button_label, on_click=callback)
 
 
 actions = {
@@ -338,12 +366,46 @@ actions = {
 
 
 def use_example(file_name: str) -> None:
+    """
+    Load an example file from disk and process it appropriately
+    :param file_name:
+        The file identifier. Either "wild" or "variant"
+    :return:
+    """
     file = BytesIO()
     with open(f'lib/example_{file_name[4:]}.pdb', 'rb') as stream:
         file.write(stream.read())
     file.seek(0)
     file.name = f'example_{file_name[4:]}.pdb'
     STATE[file_name] = file
+
+
+def file_uploader_widgets() -> None:
+    """
+    Create the File Uploaders and the associated functionality, including
+    an option to re-upload a file and use an example file.
+    :return:
+    """
+    global KEY
+    for key, value in files.items():
+        if key not in STATE.keys() or STATE[key] is None:
+            file_uploader(key, value)
+            st.button(
+                label='Use Example File',
+                key=KEY,
+                on_click=partial(use_example, file_name=key)
+            )
+            KEY += 1
+        else:
+            st.success(
+                f'{key} is uploaded --- {STATE[key].name}'
+            )
+            st.button(
+                label='Re-upload?',
+                key=KEY,
+                on_click=partial(re_upload, key=key)
+            )
+            KEY += 1
 
 
 def main() -> None:
@@ -354,27 +416,8 @@ def main() -> None:
     global STATE
     STATE = st.session_state['File Upload']
     left, center, right = st.columns([1, 2, 1])
-    global KEY
     with center:
         st.title('Upload Necessary Data')
-        for key, value in files.items():
-            if key not in STATE.keys() or STATE[key] is None:
-                file_uploader(key, value)
-                st.button(
-                    label='Use Example File',
-                    key=KEY,
-                    on_click=partial(use_example, file_name=key)
-                )
-                KEY += 1
-            else:
-                st.success(
-                    f'{key} is uploaded --- {STATE[key].name}'
-                )
-                st.button(
-                    label='Re-upload?',
-                    key=KEY,
-                    on_click=partial(re_upload, key=key)
-                )
-                KEY += 1
+        file_uploader_widgets()
         for key, value in actions.items():
             show_action(key, **value)

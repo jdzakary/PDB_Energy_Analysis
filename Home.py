@@ -1,5 +1,4 @@
 from functools import partial
-
 import streamlit as st
 import sys
 import os
@@ -72,6 +71,10 @@ def ensure_state() -> None:
 
 
 def check_local_rosetta() -> None:
+    """
+    Check if rosetta is included as part of the webserver
+    :return:
+    """
     exists = os.path.exists(LOCAL_PATH)
     if 'rosetta_installed' not in STATE.keys():
         STATE['rosetta_installed'] = False
@@ -83,6 +86,12 @@ def check_local_rosetta() -> None:
 
 
 def check_user_rosetta(path: str) -> bool:
+    """
+    Validate the user-provided rosetta path
+    :param path:
+        The user-provided rosetta path
+    :return:
+    """
     valid_path = os.path.exists(path)
     STATE['rosetta_installed'] = \
         valid_path and 'residue_energy_breakdown' in path
@@ -90,20 +99,31 @@ def check_user_rosetta(path: str) -> bool:
 
 
 def path_input(container) -> None:
+    """
+    Callback function to dynamically update the status widget without having
+    to wait for a page refresh.
+    :param container:
+        The container to write the status symbol to
+    :return:
+    """
     STATE['rosetta_path'] = st.session_state['rosetta_path']
     if check_user_rosetta(STATE['rosetta_path']):
-        container.success('Successfully Found Provided Executable')
+        container.success('Successfully Found the Provided Executable')
     else:
         container.error('Unable to find provided filepath')
 
 
 def detect_rosetta() -> None:
+    """
+    Ensure that the application knows where to find the Rosetta executable
+    :return:
+    """
     if STATE['rosetta_local']:
         st.success('Local Rosetta Installation Detected')
     else:
         status = st.container()
         if STATE['rosetta_installed']:
-            status.success('Successfully Found Provided Executable')
+            status.success('Successfully Found the Provided Executable')
         else:
             status.warning('Please Enter the Executable Path')
         st.text_input(
@@ -112,6 +132,15 @@ def detect_rosetta() -> None:
             key='rosetta_path',
             on_change=partial(path_input, status)
         )
+
+
+def sidebar_title() -> None:
+    st.markdown(
+        body="<h1 style='text-align: center;'>Kuenze Lab</h1>",
+        unsafe_allow_html=True
+    )
+    logo = load_logo()
+    st.image(logo, use_column_width=True)
 
 
 def home() -> None:
@@ -143,6 +172,29 @@ PAGES = {
     'Mutations': Mutations.main,
 }
 
+STATUS = {
+    'cleaned': dict(
+        error='PDB Files not Cleaned',
+        success='PDB Files Cleaned',
+        warning='PDB Files Changed, should re-clean'
+    ),
+    'mut_calc': dict(
+        error='Mutations Not Calculated',
+        success='Mutations Calculated',
+        warning='PDB Files Changed, should re-calculate'
+    ),
+    'depth': dict(
+        error='Residue Depth Not Calculated',
+        success='Reside Depth Calculated',
+        warning='PDB Files Changed, should re-calculate'
+    ),
+    'breakdown': dict(
+        error='Energy Breakdown Not Calculated',
+        success='Energy Breakdown Calculated',
+        warning='PDB Files Changed, should re-calculate'
+    )
+}
+
 
 def main() -> None:
     """
@@ -158,41 +210,13 @@ def main() -> None:
     global STATE
     STATE = st.session_state['Home']
     with st.sidebar:
-        st.markdown(
-            body="<h1 style='text-align: center;'>Kuenze Lab</h1>",
-            unsafe_allow_html=True
-        )
-        logo = load_logo()
-        st.image(logo, use_column_width=True)
+        sidebar_title()
         selected = st.selectbox(
             label='Select a Page',
             options=PAGES.keys()
         )
-        file_status(
-            name='cleaned',
-            error='PDB Files not Cleaned',
-            success='PDB Files Cleaned',
-            warning='PDB Files Changed, should re-clean'
-        )
-        file_status(
-            name='mut_calc',
-            error='Mutations Not Calculated',
-            success='Mutations Calculated',
-            warning='PDB Files Changed, should re-calculate'
-        )
-        file_status(
-            name='depth',
-            error='Residue Depth Not Calculated',
-            success='Residue Depth Calculated',
-            warning='PDB Files Changed, should re-calculate'
-        )
-        file_status(
-            name='breakdown',
-            error='Energy Breakdown Not Calculated',
-            success='Energy Breakdown Calculated',
-            warning='PDB Files Changed, should re-calculate'
-        )
-
+        for key, value in STATUS.items():
+            file_status(name=key, **value)
     PAGES[selected]()
 
 
