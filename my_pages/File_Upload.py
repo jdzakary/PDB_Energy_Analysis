@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import inspect
 import streamlit as st
 import pandas as pd
 import lib.energy_breakdown as eb
@@ -225,6 +226,7 @@ def calculate_depth(file_name: str) -> None:
     )
     results = {x[1][1]: y[0] for x, y in rd.property_dict.items()}
     STATE[f'depth_{file_name}'] = results
+    STATE['depth'] = True
 
 
 def calculate_energy(file_type: str) -> None:
@@ -261,11 +263,12 @@ def calculate_energy(file_type: str) -> None:
     energy.drop(energy[energy['resi2'] == '--'].index, inplace=True)
     energy['resi2'] = energy['resi2'].astype(int)
     STATE[f'energy_{file_type}'] = energy
+    STATE['breakdown'] = True
     os.remove(f'lib/storage/energy_{file_type}.csv')
     os.remove(f'lib/storage/energy_{file_type}.out')
 
 
-def find_depth() -> None:
+def find_depth(container) -> None:
     """
     Call the calculate_depth function in a separate thread, and monitor
     this thread using add_script_run_ctx
@@ -273,13 +276,15 @@ def find_depth() -> None:
     """
     for i in ['wild', 'variant']:
         if f'pdb_{i}_clean' in STATE.keys():
-            STATE['depth'] = True
             task = Thread(target=partial(calculate_depth, file_name=i))
             add_script_run_ctx(task)
             task.start()
+            container.warning(
+                f'Calculations for {i} initiated in separate thread'
+            )
 
 
-def find_energy() -> None:
+def find_energy(container) -> None:
     """
     Call the calculate_energy function in a separate thread, and monitor
     this thread using add_script_run_ctx
@@ -287,10 +292,12 @@ def find_energy() -> None:
     """
     for i in ['wild', 'variant']:
         if f'pdb_{i}_clean' in STATE.keys():
-            STATE['breakdown'] = True
             task = Thread(target=partial(calculate_energy, i))
             add_script_run_ctx(task)
             task.start()
+            container.warning(
+                f'Calculations for {i} initiated in separate thread'
+            )
 
 
 def check_rosetta() -> bool:
@@ -310,7 +317,12 @@ def show_action(
     if text_file_name == 'energy_files' and not check_rosetta():
         st.error('No Rosetta Executable Available!')
         return
-    st.button(label=button_label, on_click=callback)
+    status = st.container()
+    status.write('')
+    if len(inspect.signature(callback).parameters.keys()):
+        st.button(label=button_label, on_click=partial(callback, status))
+    else:
+        st.button(label=button_label, on_click=callback)
 
 
 actions = {
