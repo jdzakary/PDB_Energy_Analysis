@@ -240,10 +240,18 @@ def calculate_energy(file_type: str) -> None:
     with open(f'lib/storage/{file_type}.pdb', 'w') as file:
         file.write(pdb_file.read())
     pdb_file.seek(0)
+    if st.session_state['Home']['rosetta_local']:
+        this_dir = os.path.dirname(__file__)
+        root = '/'.join(this_dir.split('/')[:-1])
+        executable = f'{root}/{st.session_state["Home"]["rosetta_path"]}'
+    else:
+        executable = st.session_state["Home"]["rosetta_path"]
+    print(executable)
     eb.run(
         file_name=f'lib/storage/{file_type}.pdb',
         save_path=f'lib/storage/energy_{file_type}.out',
-        log_path=f'lib/storage/log_{file_type}.txt'
+        log_path=f'lib/storage/log_{file_type}.txt',
+        executable=executable
     )
     eb.convert_outfile(
         file_name=f'lib/storage/energy_{file_type}.out',
@@ -285,6 +293,12 @@ def find_energy() -> None:
             task.start()
 
 
+def check_rosetta() -> bool:
+    if st.session_state['Home']['rosetta_local']:
+        return True
+    return st.session_state['Home']['rosetta_installed']
+
+
 def show_action(
     header: str,
     text_file_name: str,
@@ -293,6 +307,9 @@ def show_action(
 ) -> None:
     st.subheader(header)
     st.write(load_text('file_upload', text_file_name))
+    if text_file_name == 'energy_files' and not check_rosetta():
+        st.error('No Rosetta Executable Available!')
+        return
     st.button(label=button_label, on_click=callback)
 
 
