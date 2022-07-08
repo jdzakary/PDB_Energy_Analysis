@@ -301,6 +301,10 @@ def find_energy(container) -> None:
 
 
 def check_rosetta() -> bool:
+    """
+    Check if the application has a valid Rosetta Executable to use
+    :return:
+    """
     if st.session_state['Home']['rosetta_local']:
         return True
     return st.session_state['Home']['rosetta_installed']
@@ -312,6 +316,18 @@ def show_action(
     button_label: str,
     callback: Callable
 ) -> None:
+    """
+    Display an action that can be performed on uploaded file data
+    :param header:
+        The sub-header to name this section
+    :param text_file_name:
+        The text file identifier on disk to load
+    :param button_label:
+        The label of the button that will execute the action
+    :param callback:
+        The action to be executed when the button is pressed
+    :return:
+    """
     st.subheader(header)
     st.write(load_text('file_upload', text_file_name))
     if text_file_name == 'energy_files' and not check_rosetta():
@@ -350,12 +366,46 @@ actions = {
 
 
 def use_example(file_name: str) -> None:
+    """
+    Load an example file from disk and process it appropriately
+    :param file_name:
+        The file identifier. Either "wild" or "variant"
+    :return:
+    """
     file = BytesIO()
     with open(f'lib/example_{file_name[4:]}.pdb', 'rb') as stream:
         file.write(stream.read())
     file.seek(0)
     file.name = f'example_{file_name[4:]}.pdb'
     STATE[file_name] = file
+
+
+def file_uploader_widgets() -> None:
+    """
+    Create the File Uploaders and the associated functionality, including
+    an option to re-upload a file and use an example file.
+    :return:
+    """
+    global KEY
+    for key, value in files.items():
+        if key not in STATE.keys() or STATE[key] is None:
+            file_uploader(key, value)
+            st.button(
+                label='Use Example File',
+                key=KEY,
+                on_click=partial(use_example, file_name=key)
+            )
+            KEY += 1
+        else:
+            st.success(
+                f'{key} is uploaded --- {STATE[key].name}'
+            )
+            st.button(
+                label='Re-upload?',
+                key=KEY,
+                on_click=partial(re_upload, key=key)
+            )
+            KEY += 1
 
 
 def main() -> None:
@@ -366,27 +416,8 @@ def main() -> None:
     global STATE
     STATE = st.session_state['File Upload']
     left, center, right = st.columns([1, 2, 1])
-    global KEY
     with center:
         st.title('Upload Necessary Data')
-        for key, value in files.items():
-            if key not in STATE.keys() or STATE[key] is None:
-                file_uploader(key, value)
-                st.button(
-                    label='Use Example File',
-                    key=KEY,
-                    on_click=partial(use_example, file_name=key)
-                )
-                KEY += 1
-            else:
-                st.success(
-                    f'{key} is uploaded --- {STATE[key].name}'
-                )
-                st.button(
-                    label='Re-upload?',
-                    key=KEY,
-                    on_click=partial(re_upload, key=key)
-                )
-                KEY += 1
+        file_uploader_widgets()
         for key, value in actions.items():
             show_action(key, **value)

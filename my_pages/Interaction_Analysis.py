@@ -139,16 +139,15 @@ def main():
     global STATE
     STATE = st.session_state['Interaction Analysis']
     left, center, right = st.columns([1, 2, 1])
+    if 'complete' not in STATE.keys():
+        STATE['complete'] = False
+    if 'check' not in STATE.keys():
+        STATE['check'] = {
+            x: {
+                y: False for y in ['a', 'b', 'c', 'd', 'e', 'f']
+            } for x in categories.keys()
+        }
     with center:
-        if 'complete' not in STATE.keys():
-            STATE['complete'] = False
-        if 'check' not in STATE.keys():
-            STATE['check'] = {
-                x: {
-                    y: False for y in ['a', 'b', 'c', 'd', 'e', 'f']
-                } for x in categories.keys()
-            }
-
         st.title('Changes in Pairwise Interactions')
 
         st.header('Introduction')

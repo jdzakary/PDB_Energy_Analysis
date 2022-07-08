@@ -134,6 +134,15 @@ def detect_rosetta() -> None:
         )
 
 
+def sidebar_title() -> None:
+    st.markdown(
+        body="<h1 style='text-align: center;'>Kuenze Lab</h1>",
+        unsafe_allow_html=True
+    )
+    logo = load_logo()
+    st.image(logo, use_column_width=True)
+
+
 def home() -> None:
     """
     Creates the Homepage Screen
@@ -163,6 +172,29 @@ PAGES = {
     'Mutations': Mutations.main,
 }
 
+STATUS = {
+    'cleaned': dict(
+        error='PDB Files not Cleaned',
+        success='PDB Files Cleaned',
+        warning='PDB Files Changed, should re-clean'
+    ),
+    'mut_calc': dict(
+        error='Mutations Not Calculated',
+        success='Mutations Calculated',
+        warning='PDB Files Changed, should re-calculate'
+    ),
+    'depth': dict(
+        error='Residue Depth Not Calculated',
+        success='Reside Depth Calculated',
+        warning='PDB Files Changed, should re-calculate'
+    ),
+    'breakdown': dict(
+        error='Energy Breakdown Not Calculated',
+        success='Energy Breakdown Calculated',
+        warning='PDB Files Changed, should re-calculate'
+    )
+}
+
 
 def main() -> None:
     """
@@ -178,41 +210,13 @@ def main() -> None:
     global STATE
     STATE = st.session_state['Home']
     with st.sidebar:
-        st.markdown(
-            body="<h1 style='text-align: center;'>Kuenze Lab</h1>",
-            unsafe_allow_html=True
-        )
-        logo = load_logo()
-        st.image(logo, use_column_width=True)
+        sidebar_title()
         selected = st.selectbox(
             label='Select a Page',
             options=PAGES.keys()
         )
-        file_status(
-            name='cleaned',
-            error='PDB Files not Cleaned',
-            success='PDB Files Cleaned',
-            warning='PDB Files Changed, should re-clean'
-        )
-        file_status(
-            name='mut_calc',
-            error='Mutations Not Calculated',
-            success='Mutations Calculated',
-            warning='PDB Files Changed, should re-calculate'
-        )
-        file_status(
-            name='depth',
-            error='Residue Depth Not Calculated',
-            success='Residue Depth Calculated',
-            warning='PDB Files Changed, should re-calculate'
-        )
-        file_status(
-            name='breakdown',
-            error='Energy Breakdown Not Calculated',
-            success='Energy Breakdown Calculated',
-            warning='PDB Files Changed, should re-calculate'
-        )
-
+        for key, value in STATUS.items():
+            file_status(name=key, **value)
     PAGES[selected]()
 
 
