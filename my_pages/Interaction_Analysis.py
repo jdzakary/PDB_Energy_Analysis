@@ -1,4 +1,6 @@
 import json
+from functools import partial
+
 import pandas as pd
 import streamlit as st
 from utility import load_text
@@ -69,6 +71,7 @@ def start_calculations(progress_bar) -> None:
     """
     Execute the interaction analysis
     :param progress_bar:
+        Progress bar to push updates to
     :return:
     """
     STATE['results'] = energy_calc(
@@ -162,7 +165,10 @@ def main():
         analysis_bar = st.progress(100 if STATE['complete'] else 0)
         container.button(
             label='Start Calculations',
-            on_click=lambda: start_calculations(analysis_bar),
+            on_click=partial(
+                start_calculations,
+                progress_bar=analysis_bar
+            ),
             disabled=STATE['complete']
         )
         if not STATE['complete']:

@@ -58,10 +58,16 @@ def show_grid():
         data_return_mode=DataReturnMode.AS_INPUT,
         update_mode=GridUpdateMode.SELECTION_CHANGED,
         gridOptions=options,
-        try_to_convert_back_to_original_types=False
+        try_to_convert_back_to_original_types=False,
+        theme='streamlit'
     )
     selected = grid_response['selected_rows']
     selected_df = pd.DataFrame(selected)
+    if len(selected_df):
+        to_show = selected_df['Position'].values.tolist()
+        st.session_state['Structure View']['resi'] = to_show
+    st.subheader('Selected Mutations')
+    st.write('Mutations Selected Here will show in the structure view tab')
     st.write(selected_df)
 
 
