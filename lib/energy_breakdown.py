@@ -10,7 +10,8 @@ from rosetta import rosetta_simple
 def run(
     file_name: str,
     save_path: str,
-    log_path: str
+    log_path: str,
+    executable: str,
 ) -> None:
     """
     Run the Rosetta Energy Breakdown Protocol in a Subprocess
@@ -20,11 +21,10 @@ def run(
         Location to output the result file
     :param log_path:
         Location to save the log file
+    :param executable:
+        Filepath of the Rosetta executable to run
     :return: None
     """
-    folder = os.path.dirname(__file__)
-    executable = f'{folder}/rosetta_linux/source/bin/' \
-                 'residue_energy_breakdown.static.linuxgccrelease'
     options = [
         f'-in:file:s {file_name}',
         f'-out:file:silent {save_path}'

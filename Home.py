@@ -1,3 +1,5 @@
+from functools import partial
+
 import streamlit as st
 import sys
 import os
@@ -10,6 +12,8 @@ from utility import load_text
 sys.path.append(os.path.dirname(__file__))
 
 STATE: dict
+LOCAL_PATH = 'lib/rosetta_linux/source/bin/residue_energy_breakdown' \
+             '.static.linuxgccrelease'
 
 
 def clear_session() -> None:
@@ -29,22 +33,6 @@ def load_logo() -> Image:
     """
     logo = Image.open('images/lab_logo.png')
     return logo
-
-
-def home() -> None:
-    """
-    Creates the Homepage Screen
-    :return: None
-    """
-    left, center, right = st.columns([1, 2, 1])
-    with center:
-        st.title('Energetic Analysis Tools')
-        st.header('Introduction')
-        st.write(load_text('home', 'introduction'))
-        # st.header('Reset the Application')
-        # st.error('Warning! This will Clear all Data!')
-        # st.button('Reset', on_click=clear_session)
-        # st.write(st.session_state)
 
 
 def file_status(
@@ -73,7 +61,79 @@ def file_status(
         st.warning(warning)
 
 
-pages = {
+def ensure_state() -> None:
+    """
+    Create Session State Dictionaries for Each Page
+    :return:
+    """
+    for i in PAGES.keys():
+        if i not in st.session_state.keys():
+            st.session_state[i] = {}
+
+
+def check_local_rosetta() -> None:
+    exists = os.path.exists(LOCAL_PATH)
+    if 'rosetta_installed' not in STATE.keys():
+        STATE['rosetta_installed'] = False
+        STATE['rosetta_local'] = False
+    STATE['rosetta_local'] = exists
+    if exists:
+        STATE['rosetta_path'] = LOCAL_PATH
+        STATE['rosetta_installed'] = True
+
+
+def check_user_rosetta(path: str) -> bool:
+    valid_path = os.path.exists(path)
+    STATE['rosetta_installed'] = \
+        valid_path and 'residue_energy_breakdown' in path
+    return valid_path and 'residue_energy_breakdown' in path
+
+
+def path_input(container) -> None:
+    STATE['rosetta_path'] = st.session_state['rosetta_path']
+    if check_user_rosetta(STATE['rosetta_path']):
+        container.success('Successfully Found Provided Executable')
+    else:
+        container.error('Unable to find provided filepath')
+
+
+def detect_rosetta() -> None:
+    if STATE['rosetta_local']:
+        st.success('Local Rosetta Installation Detected')
+    else:
+        status = st.container()
+        if STATE['rosetta_installed']:
+            status.success('Successfully Found Provided Executable')
+        else:
+            status.warning('Please Enter the Executable Path')
+        st.text_input(
+            label='',
+            value=STATE['rosetta_path'],
+            key='rosetta_path',
+            on_change=partial(path_input, status)
+        )
+
+
+def home() -> None:
+    """
+    Creates the Homepage Screen
+    :return: None
+    """
+    left, center, right = st.columns([1, 2, 1])
+    check_local_rosetta()
+    with center:
+        st.title('Energetic Analysis Tools')
+        st.header('Introduction')
+        st.write(load_text('home', 'introduction'))
+        st.subheader('Rosetta Requirement')
+        st.write(load_text('home', 'rosetta'))
+        if 'rosetta_path' not in STATE.keys():
+            STATE['rosetta_path'] = 'main/source/bin/residue_energy_' \
+                                    'breakdown.static.linuxgccrelease'
+        detect_rosetta()
+
+
+PAGES = {
     'Home': home,
     'File Upload': File_Upload.main,
     'Interaction Analysis': Interaction_Analysis.main,
@@ -82,12 +142,6 @@ pages = {
     'Structure View': Structure_View.main,
     'Mutations': Mutations.main,
 }
-
-
-def ensure_state() -> None:
-    for i in pages.keys():
-        if i not in st.session_state.keys():
-            st.session_state[i] = {}
 
 
 def main() -> None:
@@ -101,6 +155,8 @@ def main() -> None:
         layout='wide'
     )
     ensure_state()
+    global STATE
+    STATE = st.session_state['Home']
     with st.sidebar:
         st.markdown(
             body="<h1 style='text-align: center;'>Kuenze Lab</h1>",
@@ -110,7 +166,7 @@ def main() -> None:
         st.image(logo, use_column_width=True)
         selected = st.selectbox(
             label='Select a Page',
-            options=pages.keys()
+            options=PAGES.keys()
         )
         file_status(
             name='cleaned',
@@ -137,7 +193,7 @@ def main() -> None:
             warning='PDB Files Changed, should re-calculate'
         )
 
-    pages[selected]()
+    PAGES[selected]()
 
 
 if __name__ == '__main__':

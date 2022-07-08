@@ -1,0 +1,13 @@
+Here is where you would place the local instillation of Rosetta if you are running
+this application as a webserver, where the source code is not exposed to individuals
+without a Rosetta Licence.
+
+Obviously the entire Rosetta software suite is not required for this program to run.
+Only the residue energy breakdown binary and the supporting datafiles it accesses
+need to be included. A full tree structure is included, but here is a summary:
+
+rosetta_linux/
+|--database
+|--source
+|  |--bin
+|  |  |--residue_energy_breakdown.static.linuxgccrelease
