@@ -28,6 +28,22 @@ files = {
     'pdb_variant': {
         'label': 'PDB Structure: Variant',
         'type': ['pdb'],
+    },
+    'energy_wild': {
+        'label': '(Optional): Energy Breakdown Wild-Type',
+        'type': ['csv']
+    },
+    'energy_variant': {
+        'label': '(Optional): Energy Breakdown Variant',
+        'type': ['csv']
+    },
+    'depth_wild': {
+        'label': '(Optional): Residue Depth Wild-Type',
+        'type': ['json']
+    },
+    'depth_variant': {
+        'label': '(Optional): Residue Depth Variant',
+        'type': ['json']
     }
 }
 
@@ -372,12 +388,24 @@ def use_example(file_name: str) -> None:
         The file identifier. Either "wild" or "variant"
     :return:
     """
-    file = BytesIO()
-    with open(f'lib/example_{file_name[4:]}.pdb', 'rb') as stream:
-        file.write(stream.read())
-    file.seek(0)
-    file.name = f'example_{file_name[4:]}.pdb'
-    STATE[file_name] = file
+    if file_name[0:6] == 'energy':
+        energy = pd.read_csv(f'lib/example_{file_name}.txt')
+        energy.name = f'example_{file_name}.txt'
+        STATE[file_name] = energy
+        STATE['breakdown'] = True
+    elif file_name[0:5] == 'depth':
+        with open(f'lib/example_{file_name}.txt') as file:
+            results = json.load(file)
+        results = {int(x): y for x, y in results.items()}
+        STATE[file_name] = results
+        STATE['depth'] = True
+    else:
+        file = BytesIO()
+        with open(f'lib/example_{file_name}.txt', 'rb') as stream:
+            file.write(stream.read())
+        file.seek(0)
+        file.name = f'example_{file_name}.txt'
+        STATE[file_name] = file
 
 
 def file_uploader_widgets() -> None:
@@ -397,8 +425,12 @@ def file_uploader_widgets() -> None:
             )
             KEY += 1
         else:
+            if key[0:5] == 'depth':
+                name = f'example_{key}.txt'
+            else:
+                name = STATE[key].name
             st.success(
-                f'{key} is uploaded --- {STATE[key].name}'
+                f'{key} is uploaded --- {name}'
             )
             st.button(
                 label='Re-upload?',
